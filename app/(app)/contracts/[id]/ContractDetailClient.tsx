@@ -235,7 +235,7 @@ export default function ContractDetailClient({ contract: initialContract, events
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-6 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
         <div className="flex-1 min-w-0">
           {editing ? (
             <div className="flex items-center gap-2 mb-1">
@@ -283,8 +283,8 @@ export default function ContractDetailClient({ contract: initialContract, events
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="text-right mr-2">
+        <div className="flex items-center gap-3 sm:shrink-0">
+          <div className="text-left sm:text-right mr-2">
             <p className="text-lg font-semibold text-white">
               {formatCurrency(contract.contract_value, contract.value_currency)}
             </p>
@@ -309,7 +309,7 @@ export default function ContractDetailClient({ contract: initialContract, events
       </div>
 
       {/* Metric cards */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-surface border border-[#27272a] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-2">
             <Activity className="w-4 h-4 text-[#a1a1aa]" />

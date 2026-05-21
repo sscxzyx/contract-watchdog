@@ -5,6 +5,7 @@ import {
   TrendingUp, Shield, Activity, ChevronRight,
   Calendar
 } from 'lucide-react'
+import OnboardingWizard from '@/components/OnboardingWizard'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -63,6 +64,8 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default async function DashboardPage() {
   const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
   const today = new Date().toISOString().split('T')[0]
   const in30Days = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]
   const in90Days = new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0]
@@ -91,6 +94,15 @@ export default async function DashboardPage() {
   const allContracts = contracts ?? []
   const events = timelineEvents ?? []
   const recent = recentContracts ?? []
+
+  // ── onboarding wizard for brand-new users ──────────────────────────────────
+  if (user && allContracts.length === 0) {
+    const { data: profile } = await supabase
+      .from('users').select('onboarding_complete, full_name').eq('id', user.id).single()
+    if (profile && !profile.onboarding_complete) {
+      return <OnboardingWizard userId={user.id} initialName={profile.full_name} />
+    }
+  }
 
   // ── empty state ────────────────────────────────────────────────────────────
   if (allContracts.length === 0) {
