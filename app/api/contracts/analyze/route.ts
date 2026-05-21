@@ -1,0 +1,169 @@
+import { createClient } from '@/lib/supabase/server'
+import Anthropic from '@anthropic-ai/sdk'
+import { NextResponse } from 'next/server'
+import type { AiAnalysis } from '@/types/database'
+
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+function getStatus(endDate: string | null): string {
+  if (!endDate) return 'active'
+  const daysLeft = Math.floor((new Date(endDate).getTime() - Date.now()) / 86400000)
+  if (daysLeft < 0) return 'expired'
+  if (daysLeft <= 30) return 'expiring_soon'
+  return 'active'
+}
+
+export async function POST(request: Request) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { filePath, fileName } = await request.json() as { filePath: string; fileName: string }
+
+  // 1. Download from Supabase Storage
+  const { data: fileBlob, error: downloadError } = await supabase.storage
+    .from('contracts')
+    .download(filePath)
+
+  if (downloadError || !fileBlob) {
+    return NextResponse.json({ error: 'Failed to retrieve uploaded file' }, { status: 500 })
+  }
+
+  // 2. Extract text
+  let extractedText = ''
+  const buffer = Buffer.from(await fileBlob.arrayBuffer())
+  const lower = fileName.toLowerCase()
+
+  try {
+    if (lower.endsWith('.pdf')) {
+      const pdf = (await import('pdf-parse/lib/pdf-parse.js')).default
+      const result = await pdf(buffer)
+      extractedText = result.text
+    } else if (lower.endsWith('.docx')) {
+      const mammoth = (await import('mammoth')).default
+      const result = await mammoth.extractRawText({ buffer })
+      extractedText = result.value
+    } else {
+      return NextResponse.json({ error: 'Only PDF and DOCX files are supported' }, { status: 400 })
+    }
+  } catch {
+    return NextResponse.json(
+      { error: 'Could not extract text from this document. If it is a scanned image, it cannot be processed.' },
+      { status: 422 }
+    )
+  }
+
+  if (!extractedText.trim()) {
+    return NextResponse.json(
+      { error: 'No readable text found in this document' },
+      { status: 422 }
+    )
+  }
+
+  // 3. Analyse with Claude
+  let analysis: AiAnalysis
+  try {
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 4096,
+      messages: [{
+        role: 'user',
+        content: `Analyse the following contract and return ONLY valid JSON — no markdown, no explanation, no preamble.
+
+Return exactly this structure:
+{
+  "contract_type": string or null,
+  "counterparty_name": string or null,
+  "start_date": "YYYY-MM-DD" or null,
+  "end_date": "YYYY-MM-DD" or null,
+  "renewal_date": "YYYY-MM-DD" or null,
+  "notice_deadline": "YYYY-MM-DD" or null,
+  "contract_value": number or null,
+  "value_currency": string or null,
+  "importance_score": integer 1-10 or null,
+  "health_score": integer 0-100 or null,
+  "risk_level": "low" or "medium" or "high" or null,
+  "ai_summary": string or null,
+  "risk_flags": [{"severity": "low"|"medium"|"high", "description": string}],
+  "obligations_ours": [string],
+  "obligations_theirs": [string],
+  "cancellation_terms": string or null,
+  "renewal_terms": string or null,
+  "key_dates": [{"label": string, "date": "YYYY-MM-DD"}]
+}
+
+Rules:
+- Never fabricate values. Use null if the information is not explicitly in the document.
+- All dates must be YYYY-MM-DD format.
+- importance_score: 1=trivial, 10=mission-critical. Base on value, duration, and strategic impact.
+- health_score: 0=very problematic terms, 100=excellent terms for our side.
+- ai_summary: 3-4 plain English sentences for a small business owner with no legal background.
+- key_dates: include every significant date — start, end, renewal, notice deadlines, payment dates, milestones.
+
+Contract text:
+${extractedText.slice(0, 80000)}`,
+      }],
+    })
+
+    const raw = message.content[0].type === 'text' ? message.content[0].text : ''
+    const match = raw.match(/\{[\s\S]*\}/)
+    if (!match) throw new Error('No JSON in response')
+    analysis = JSON.parse(match[0]) as AiAnalysis
+  } catch {
+    return NextResponse.json({ error: 'AI analysis failed — please try again' }, { status: 500 })
+  }
+
+  // 4. Save contract
+  const contractName = analysis.counterparty_name
+    ? `${analysis.contract_type ?? 'Contract'} — ${analysis.counterparty_name}`
+    : (analysis.contract_type ?? fileName)
+
+  const { data: contract, error: insertError } = await supabase
+    .from('contracts')
+    .insert({
+      user_id: user.id,
+      file_name: fileName,
+      file_url: filePath,
+      contract_name: contractName,
+      counterparty_name: analysis.counterparty_name,
+      contract_type: analysis.contract_type,
+      status: getStatus(analysis.end_date),
+      start_date: analysis.start_date,
+      end_date: analysis.end_date,
+      renewal_date: analysis.renewal_date,
+      notice_deadline: analysis.notice_deadline,
+      contract_value: analysis.contract_value,
+      value_currency: analysis.value_currency,
+      value_extracted: analysis.contract_value !== null,
+      importance_score: analysis.importance_score,
+      health_score: analysis.health_score,
+      risk_level: analysis.risk_level,
+      ai_summary: analysis.ai_summary,
+      ai_analysis_json: analysis,
+    })
+    .select('id')
+    .single()
+
+  if (insertError || !contract) {
+    return NextResponse.json({ error: 'Failed to save contract — please try again' }, { status: 500 })
+  }
+
+  // 5. Insert contract_events for key_dates
+  const validDates = (analysis.key_dates ?? []).filter(kd => kd.date && kd.label)
+  if (validDates.length) {
+    await supabase.from('contract_events').insert(
+      validDates.map(kd => ({
+        contract_id: contract.id,
+        user_id: user.id,
+        event_type: 'key_date',
+        event_date: kd.date,
+        event_label: kd.label,
+      }))
+    )
+  }
+
+  return NextResponse.json({ contractId: contract.id })
+}
