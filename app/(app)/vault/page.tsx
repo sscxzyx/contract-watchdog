@@ -220,6 +220,7 @@ function VaultContent() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [filterStatus, setFilterStatus] = useState<string[]>([])
   const [filterRisk, setFilterRisk] = useState<string[]>([])
+  const [filterType, setFilterType] = useState<string[]>([])
 
   // Apply URL filter params from dashboard cards
   useEffect(() => {
@@ -260,8 +261,9 @@ function VaultContent() {
     }
     if (filterStatus.length) r = r.filter(c => filterStatus.includes(c.status))
     if (filterRisk.length) r = r.filter(c => c.risk_level !== null && filterRisk.includes(c.risk_level))
+    if (filterType.length) r = r.filter(c => c.contract_type !== null && filterType.includes(c.contract_type))
     return sortContracts(r, sortKey, sortDir)
-  }, [contracts, search, filterStatus, filterRisk, sortKey, sortDir])
+  }, [contracts, search, filterStatus, filterRisk, filterType, sortKey, sortDir])
 
   function toggleSort(k: SortKey) {
     if (sortKey === k) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
@@ -272,7 +274,7 @@ function VaultContent() {
     setFn(set.includes(value) ? set.filter(v => v !== value) : [...set, value])
   }
 
-  const hasFilters = filterStatus.length > 0 || filterRisk.length > 0 || search
+  const hasFilters = filterStatus.length > 0 || filterRisk.length > 0 || filterType.length > 0 || search
 
   // ── loading ──────────────────────────────────────────────────────────────
   if (loading) {
@@ -397,9 +399,28 @@ function VaultContent() {
           </button>
         ))}
 
+        {contractTypes.length > 0 && (
+          <>
+            <span className="w-px h-4 bg-[#27272a]" />
+            {contractTypes.map(t => (
+              <button
+                key={t}
+                onClick={() => toggleFilter(filterType, setFilterType, t)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                  filterType.includes(t)
+                    ? 'bg-accent/10 text-accent border-accent/20'
+                    : 'border-[#27272a] text-[#a1a1aa] hover:border-[#3f3f46] hover:text-white'
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </>
+        )}
+
         {hasFilters && (
           <button
-            onClick={() => { setFilterStatus([]); setFilterRisk([]); setSearch('') }}
+            onClick={() => { setFilterStatus([]); setFilterRisk([]); setFilterType([]); setSearch('') }}
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs text-[#a1a1aa] hover:text-white border border-[#27272a] hover:border-[#3f3f46] transition-colors"
           >
             <X className="w-3 h-3" /> Clear
