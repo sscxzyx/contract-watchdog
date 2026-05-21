@@ -111,6 +111,7 @@ function DeleteModal({ onConfirm, onCancel, loading }: {
 // ─── props ────────────────────────────────────────────────────────────────────
 
 interface Props {
+  userId: string
   authEmail: string
   profile: UserType | null
   settings: UserSettings | null
@@ -118,7 +119,7 @@ interface Props {
 
 // ─── main component ───────────────────────────────────────────────────────────
 
-export default function SettingsClient({ authEmail, profile, settings }: Props) {
+export default function SettingsClient({ userId, authEmail, profile, settings }: Props) {
   const router = useRouter()
 
   // Profile state
@@ -135,7 +136,6 @@ export default function SettingsClient({ authEmail, profile, settings }: Props) 
   const [savingNotifs, setSavingNotifs] = useState(false)
 
   // Password state
-  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [savingPassword, setSavingPassword] = useState(false)
@@ -163,7 +163,7 @@ export default function SettingsClient({ authEmail, profile, settings }: Props) 
       full_name: fullName.trim() || null,
       company_name: company.trim() || null,
       industry: industry.trim() || null,
-    }).eq('id', profile?.id ?? '')
+    }).eq('id', userId)
     setSavingProfile(false)
     flashSaved()
   }
@@ -176,7 +176,7 @@ export default function SettingsClient({ authEmail, profile, settings }: Props) 
       email_alerts_enabled: emailAlertsEnabled,
       alert_days_before: alertDays.sort((a, b) => b - a),
       extra_recipients: extraRecipients,
-    }).eq('user_id', profile?.id ?? '')
+    }).eq('user_id', userId)
     setSavingNotifs(false)
     flashSaved()
   }
@@ -213,7 +213,6 @@ export default function SettingsClient({ authEmail, profile, settings }: Props) 
     if (error) {
       setPasswordError(error.message)
     } else {
-      setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
       flashSaved()
@@ -225,7 +224,7 @@ export default function SettingsClient({ authEmail, profile, settings }: Props) 
     setDeletingAccount(true)
     const supabase = createClient()
     // Deleting the user row cascades to contracts, events, alerts, settings
-    await supabase.from('users').delete().eq('id', profile?.id ?? '')
+    await supabase.from('users').delete().eq('id', userId)
     await supabase.auth.signOut()
     router.push('/login')
   }

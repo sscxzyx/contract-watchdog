@@ -214,6 +214,7 @@ function VaultContent() {
   const searchParams = useSearchParams()
   const [contracts, setContracts] = useState<ContractRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(false)
   const [view, setView] = useState<ViewMode>('grid')
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
@@ -234,11 +235,15 @@ function VaultContent() {
   useEffect(() => {
     async function load() {
       const supabase = createClient()
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('contracts')
         .select('id, contract_name, counterparty_name, contract_type, status, risk_level, health_score, contract_value, value_currency, end_date, created_at, ai_summary, contract_events(id, event_date, event_label)')
         .order('created_at', { ascending: false })
-      setContracts((data as ContractRow[]) ?? [])
+      if (error) {
+        setFetchError(true)
+      } else {
+        setContracts((data as ContractRow[]) ?? [])
+      }
       setLoading(false)
     }
     load()
@@ -286,6 +291,16 @@ function VaultContent() {
             <div key={i} className="h-40 bg-[#1a1a1a] rounded-xl animate-pulse" />
           ))}
         </div>
+      </div>
+    )
+  }
+
+  // ── error state ──────────────────────────────────────────────────────────
+  if (fetchError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <p className="text-red-400 text-sm mb-2">Failed to load contracts</p>
+        <p className="text-[#52525b] text-xs">Check your connection and refresh the page</p>
       </div>
     )
   }

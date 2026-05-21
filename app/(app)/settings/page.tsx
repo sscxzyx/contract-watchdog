@@ -15,6 +15,7 @@ export default async function SettingsPage() {
 
   return (
     <SettingsClient
+      userId={user.id}
       authEmail={user.email ?? ''}
       profile={profile as User}
       settings={settings as UserSettings}
