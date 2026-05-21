@@ -1,16 +1,23 @@
-export default function SettingsPage() {
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Settings</h1>
-        <p className="text-[#a1a1aa] mt-1 text-sm">Manage your account and preferences</p>
-      </div>
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import SettingsClient from './SettingsClient'
+import type { User, UserSettings } from '@/types/database'
 
-      <div className="flex items-center justify-center h-64 border border-dashed border-[#27272a] rounded-xl">
-        <div className="text-center">
-          <p className="text-[#a1a1aa] text-sm">Settings coming in Phase 7</p>
-        </div>
-      </div>
-    </div>
+export default async function SettingsPage() {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const [{ data: profile }, { data: settings }] = await Promise.all([
+    supabase.from('users').select('*').eq('id', user.id).single(),
+    supabase.from('user_settings').select('*').eq('user_id', user.id).single(),
+  ])
+
+  return (
+    <SettingsClient
+      authEmail={user.email ?? ''}
+      profile={profile as User}
+      settings={settings as UserSettings}
+    />
   )
 }

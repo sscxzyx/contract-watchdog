@@ -2,8 +2,9 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, FileText, X, Shield, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Upload, FileText, X, Shield, CheckCircle, AlertCircle, Loader2, Zap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import type { PlanTier } from '@/types/database'
 
 type State =
   | { status: 'idle' }
@@ -25,11 +26,92 @@ const ACCEPTED = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ]
 
+const PLAN_LIMITS: Record<PlanTier, number | null> = {
+  starter: 5,
+  business: 25,
+  agency: null,
+}
+
+const PLAN_LABEL: Record<PlanTier, string> = {
+  starter: 'Starter',
+  business: 'Business',
+  agency: 'Agency',
+}
+
+// ─── upgrade modal ────────────────────────────────────────────────────────────
+
+function UpgradeModal({ currentPlan, contractCount, onClose }: {
+  currentPlan: PlanTier
+  contractCount: number
+  onClose: () => void
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="bg-surface border border-[#27272a] rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 rounded-full bg-amber-400/10">
+            <Zap className="w-5 h-5 text-amber-400" />
+          </div>
+          <div>
+            <h2 className="text-white font-semibold text-lg">Contract limit reached</h2>
+            <p className="text-xs text-[#a1a1aa]">
+              You have {contractCount} contract{contractCount !== 1 ? 's' : ''} on the {PLAN_LABEL[currentPlan]} plan
+            </p>
+          </div>
+          <button onClick={onClose} className="ml-auto text-[#52525b] hover:text-white transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-2 mb-6">
+          {([
+            { tier: 'starter', label: 'Starter', price: 'Free', limit: '5 contracts' },
+            { tier: 'business', label: 'Business', price: '£19/mo', limit: '25 contracts' },
+            { tier: 'agency', label: 'Agency', price: '£49/mo', limit: 'Unlimited' },
+          ] as const).map(plan => (
+            <div
+              key={plan.tier}
+              className={`flex items-center justify-between p-3.5 rounded-xl border transition-colors ${
+                plan.tier === currentPlan
+                  ? 'border-accent/30 bg-accent/5'
+                  : 'border-[#27272a] bg-[#0a0a0a]'
+              }`}
+            >
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-white">{plan.label}</span>
+                  {plan.tier === currentPlan && (
+                    <span className="text-xs text-accent">Current</span>
+                  )}
+                </div>
+                <p className="text-xs text-[#a1a1aa]">{plan.limit}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-semibold text-white">{plan.price}</p>
+                {plan.tier !== currentPlan && plan.tier !== 'starter' && (
+                  <p className="text-xs text-[#52525b]">coming soon</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-xs text-[#a1a1aa] text-center">
+          Stripe billing is coming soon. <a href="/settings" className="text-accent hover:underline">View billing settings</a>
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// ─── page ─────────────────────────────────────────────────────────────────────
+
 export default function UploadPage() {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const [state, setState] = useState<State>({ status: 'idle' })
   const [dragOver, setDragOver] = useState(false)
+  const [limitModal, setLimitModal] = useState<{ plan: PlanTier; count: number } | null>(null)
 
   const validateAndSelect = useCallback((file: File) => {
     if (!ACCEPTED.includes(file.type)) {
@@ -58,6 +140,20 @@ export default function UploadPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       setState({ status: 'error', message: 'You must be signed in to upload.' })
+      return
+    }
+
+    // Tier enforcement: check contract count vs plan limit
+    const [{ data: profile }, { count }] = await Promise.all([
+      supabase.from('users').select('plan_tier').eq('id', user.id).single(),
+      supabase.from('contracts').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+    ])
+    const planTier = ((profile?.plan_tier as PlanTier | undefined) ?? 'starter') as PlanTier
+    const limit = PLAN_LIMITS[planTier]
+    const contractCount = count ?? 0
+
+    if (limit !== null && contractCount >= limit) {
+      setLimitModal({ plan: planTier, count: contractCount })
       return
     }
 
@@ -100,7 +196,7 @@ export default function UploadPage() {
     router.push(`/contracts/${contractId}`)
   }
 
-  // ── Analysing screen ──────────────────────────────────────────────
+  // ── Analysing screen ──────────────────────────────────────────────────────
   if (state.status === 'analysing') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
@@ -109,7 +205,6 @@ export default function UploadPage() {
         </div>
         <h2 className="text-xl font-semibold text-white mb-2">Analysing your contract…</h2>
         <p className="text-[#a1a1aa] text-sm mb-8">This usually takes 15–30 seconds</p>
-
         <div className="w-full max-w-xs space-y-3 text-left">
           {ANALYSIS_STEPS.map((label, i) => (
             <div key={i} className="flex items-center gap-3">
@@ -130,15 +225,22 @@ export default function UploadPage() {
     )
   }
 
-  // ── Main upload UI ────────────────────────────────────────────────
+  // ── Main upload UI ────────────────────────────────────────────────────────
   return (
     <div className="max-w-xl">
+      {limitModal && (
+        <UpgradeModal
+          currentPlan={limitModal.plan}
+          contractCount={limitModal.count}
+          onClose={() => setLimitModal(null)}
+        />
+      )}
+
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-white">Upload Contract</h1>
         <p className="text-[#a1a1aa] mt-1 text-sm">PDF or DOCX — up to 25 MB</p>
       </div>
 
-      {/* Error banner */}
       {state.status === 'error' && (
         <div className="mb-4 flex items-start gap-3 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20">
           <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
@@ -146,7 +248,6 @@ export default function UploadPage() {
         </div>
       )}
 
-      {/* Drop zone */}
       <div
         onDragOver={e => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
@@ -175,9 +276,7 @@ export default function UploadPage() {
             </div>
             <div>
               <p className="text-white font-medium text-sm">{state.file.name}</p>
-              <p className="text-[#a1a1aa] text-xs mt-0.5">
-                {(state.file.size / 1024 / 1024).toFixed(2)} MB
-              </p>
+              <p className="text-[#a1a1aa] text-xs mt-0.5">{(state.file.size / 1024 / 1024).toFixed(2)} MB</p>
             </div>
             <button
               onClick={e => { e.stopPropagation(); setState({ status: 'idle' }) }}
@@ -204,7 +303,6 @@ export default function UploadPage() {
         )}
       </div>
 
-      {/* Analyse button */}
       {state.status === 'selected' && (
         <button
           onClick={handleAnalyse}
