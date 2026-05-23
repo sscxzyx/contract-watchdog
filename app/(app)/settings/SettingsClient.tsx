@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   User, Bell, CreditCard, Shield, Check,
@@ -31,6 +31,14 @@ const HEADACHE_OPTIONS = [
   'Tracking obligations', 'Managing multiple contracts', 'Spotting risky clauses',
 ]
 
+const NAV_SECTIONS = [
+  { id: 'profile', label: 'Profile', icon: User },
+  { id: 'business', label: 'Business', icon: Briefcase },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'billing', label: 'Billing', icon: CreditCard },
+  { id: 'account', label: 'Account', icon: Shield },
+] as const
+
 const PLAN_LIMITS: Record<PlanTier, number | null> = {
   starter: 5,
   business: 25,
@@ -51,13 +59,14 @@ const PLAN_COLOUR: Record<PlanTier, string> = {
 
 // ─── section wrapper ──────────────────────────────────────────────────────────
 
-function Section({ title, icon: Icon, children }: {
+function Section({ id, title, icon: Icon, children }: {
+  id: string
   title: string
   icon: React.ElementType
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-surface border border-[#27272a] rounded-xl p-6">
+    <div id={id} className="bg-surface border border-[#27272a] rounded-xl p-6 scroll-mt-20">
       <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-[#1a1a1a]">
         <Icon className="w-4 h-4 text-[#a1a1aa]" />
         <h2 className="text-sm font-semibold text-white">{title}</h2>
@@ -185,6 +194,28 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
   const planTier = (profile?.plan_tier ?? 'starter') as PlanTier
   const contractLimit = PLAN_LIMITS[planTier]
 
+  const [activeSection, setActiveSection] = useState('profile')
+
+  function scrollToSection(id: string) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  useEffect(() => {
+    const ids = ['profile', 'business', 'notifications', 'billing', 'account']
+    function onScroll() {
+      for (const id of [...ids].reverse()) {
+        const el = document.getElementById(id)
+        if (el && el.getBoundingClientRect().top <= 120) {
+          setActiveSection(id)
+          return
+        }
+      }
+      setActiveSection('profile')
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   // ── save profile ────────────────────────────────────────────────────────────
   async function saveProfile() {
     setSavingProfile(true)
@@ -285,7 +316,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-4xl">
       {showDeleteModal && (
         <DeleteModal
           onConfirm={deleteAccount}
@@ -295,13 +326,57 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
       )}
       <SaveBanner saved={saved} />
 
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Settings</h1>
-        <p className="text-[#a1a1aa] mt-1 text-sm">Manage your account and preferences</p>
+      {/* mobile nav strip */}
+      <div className="md:hidden flex gap-1 overflow-x-auto pb-3 mb-6 border-b border-[#1a1a1a]">
+        {NAV_SECTIONS.map(nav => (
+          <button
+            key={nav.id}
+            onClick={() => scrollToSection(nav.id)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+              activeSection === nav.id ? 'bg-accent/10 text-white' : 'text-[#a1a1aa] hover:text-white'
+            }`}
+          >
+            <nav.icon className={`w-3.5 h-3.5 shrink-0 ${activeSection === nav.id ? 'text-accent' : ''}`} />
+            {nav.label}
+          </button>
+        ))}
       </div>
 
-      {/* ── Profile ── */}
-      <Section title="Profile" icon={User}>
+      <div className="flex gap-8 items-start">
+        {/* sidebar — desktop only */}
+        <aside className="hidden md:flex flex-col w-44 sticky top-20 shrink-0">
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold text-white">Settings</h1>
+            <p className="text-[#a1a1aa] mt-2 text-sm">Manage your account and preferences</p>
+          </div>
+          <nav className="space-y-0.5">
+            {NAV_SECTIONS.map(nav => (
+              <button
+                key={nav.id}
+                onClick={() => scrollToSection(nav.id)}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                  activeSection === nav.id
+                    ? 'bg-accent/10 text-white'
+                    : 'text-[#a1a1aa] hover:text-white hover:bg-[#1a1a1a]'
+                }`}
+              >
+                <nav.icon className={`w-4 h-4 shrink-0 ${activeSection === nav.id ? 'text-accent' : 'text-[#52525b]'}`} />
+                {nav.label}
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        {/* main content */}
+        <div className="flex-1 min-w-0 space-y-6">
+          {/* mobile header */}
+          <div className="md:hidden mb-2">
+            <h1 className="text-2xl font-semibold text-white">Settings</h1>
+            <p className="text-[#a1a1aa] mt-1 text-sm">Manage your account and preferences</p>
+          </div>
+
+          {/* ── Profile ── */}
+          <Section id="profile" title="Profile" icon={User}>
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Email</label>
@@ -352,8 +427,8 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
         </div>
       </Section>
 
-      {/* ── Business Profile ── */}
-      <Section title="Business Profile" icon={Briefcase}>
+          {/* ── Business Profile ── */}
+          <Section id="business" title="Business Profile" icon={Briefcase}>
         <div className="space-y-5">
           <p className="text-xs text-[#52525b] -mt-2">
             These answers personalise Claude&apos;s contract analysis to your industry and situation.
@@ -448,8 +523,8 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
         </div>
       </Section>
 
-      {/* ── Notifications ── */}
-      <Section title="Notifications" icon={Bell}>
+          {/* ── Notifications ── */}
+          <Section id="notifications" title="Notifications" icon={Bell}>
         <div className="space-y-6">
           {/* Notification preference */}
           <div>
@@ -580,8 +655,8 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
         </div>
       </Section>
 
-      {/* ── Billing ── */}
-      <Section title="Billing" icon={CreditCard}>
+          {/* ── Billing ── */}
+          <Section id="billing" title="Billing" icon={CreditCard}>
         <div className="space-y-6">
           {/* Current plan */}
           <div className="flex items-center justify-between p-4 bg-[#1a1a1a] rounded-xl border border-[#27272a]">
@@ -637,8 +712,8 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
         </div>
       </Section>
 
-      {/* ── Account ── */}
-      <Section title="Account" icon={Shield}>
+          {/* ── Account ── */}
+          <Section id="account" title="Account" icon={Shield}>
         <div className="space-y-8">
           {/* Change password */}
           <div>
@@ -707,7 +782,9 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
             </button>
           </div>
         </div>
-      </Section>
+          </Section>
+        </div>
+      </div>
     </div>
   )
 }
