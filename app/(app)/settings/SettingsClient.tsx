@@ -603,7 +603,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
             {([
               { tier: 'starter', label: 'Starter', price: 'A$29/mo', limit: '5 contracts', features: ['AI analysis', 'Email alerts', 'Plain English summaries'] },
               { tier: 'business', label: 'Business', price: 'A$59/mo', limit: '25 contracts', features: ['Everything in Starter', 'Email + SMS alerts', 'Risk scoring & flags'] },
-              { tier: 'agency', label: 'Agency', price: 'A$149/mo', limit: 'Unlimited contracts', features: ['Everything in Business', 'White label ready', 'API access'] },
+              { tier: 'agency', label: 'Agency', price: 'A$190/mo', limit: 'Unlimited contracts + 50GB storage', features: ['Everything in Business', 'White label ready', 'API access'] },
             ] as const).map(plan => (
               <div
                 key={plan.tier}

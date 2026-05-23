@@ -67,7 +67,7 @@ function UpgradeModal({ currentPlan, contractCount, onClose }: {
           {([
             { tier: 'starter', label: 'Starter', price: 'Free', limit: '5 contracts' },
             { tier: 'business', label: 'Business', price: '£19/mo', limit: '25 contracts' },
-            { tier: 'agency', label: 'Agency', price: '£49/mo', limit: 'Unlimited' },
+            { tier: 'agency', label: 'Agency', price: 'A$190/mo', limit: 'Unlimited + 50GB' },
           ] as const).map(plan => (
             <div
               key={plan.tier}

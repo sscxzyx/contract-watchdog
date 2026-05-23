@@ -14,8 +14,8 @@ import type { PlanTier, BusinessType, ContractVolume, NotificationPref } from '@
 
 const STEP_LABELS = ['Choose plan', 'Your business', 'Your contracts', 'Notifications']
 
-const PLAN_MONTHLY: Record<PlanTier, number> = { starter: 29, business: 59, agency: 149 }
-const PLAN_ANNUAL: Record<PlanTier, number> = { starter: 23, business: 47, agency: 119 }
+const PLAN_MONTHLY: Record<PlanTier, number> = { starter: 29, business: 59, agency: 190 }
+const PLAN_ANNUAL: Record<PlanTier, number> = { starter: 23, business: 47, agency: 152 }
 
 const BUSINESS_TYPES: { value: BusinessType; label: string }[] = [
   { value: 'sole_trader', label: 'Sole Trader' },
@@ -412,7 +412,7 @@ export default function OnboardingPage() {
                 plan="agency"
                 price={billing === 'annual' ? PLAN_ANNUAL.agency : PLAN_MONTHLY.agency}
                 annual={billing === 'annual'}
-                features={['Unlimited contracts', 'Everything in Business', 'White label ready', 'API access', 'Unlimited users', 'Priority support']}
+                features={['Unlimited contracts', '50GB document storage', 'Everything in Business', 'White label ready', 'API access', 'Unlimited users', 'Priority support']}
                 onSelect={() => selectPlan('agency')}
                 saving={saving && selectedPlan === 'agency'}
               />
