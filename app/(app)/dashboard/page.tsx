@@ -3,9 +3,8 @@ import Link from 'next/link'
 import {
   AlertTriangle, Clock, FileText, Upload,
   TrendingUp, Shield, Activity, ChevronRight,
-  Calendar
+  Calendar, User,
 } from 'lucide-react'
-import OnboardingWizard from '@/components/OnboardingWizard'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -74,6 +73,7 @@ export default async function DashboardPage() {
     { data: contracts },
     { data: timelineEvents },
     { data: recentContracts },
+    { data: profile },
   ] = await Promise.all([
     supabase
       .from('contracts')
@@ -89,20 +89,16 @@ export default async function DashboardPage() {
       .select('id, contract_name, counterparty_name, status, risk_level, created_at')
       .order('created_at', { ascending: false })
       .limit(5),
+    supabase
+      .from('users')
+      .select('onboarding_complete, full_name, industry, plan_tier')
+      .eq('id', user!.id)
+      .single(),
   ])
 
   const allContracts = contracts ?? []
   const events = timelineEvents ?? []
   const recent = recentContracts ?? []
-
-  // ── onboarding wizard for brand-new users ──────────────────────────────────
-  if (user && allContracts.length === 0) {
-    const { data: profile } = await supabase
-      .from('users').select('onboarding_complete, full_name').eq('id', user.id).single()
-    if (profile && !profile.onboarding_complete) {
-      return <OnboardingWizard userId={user.id} initialName={profile.full_name} />
-    }
-  }
 
   // ── empty state ────────────────────────────────────────────────────────────
   if (allContracts.length === 0) {
@@ -151,11 +147,36 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
 
+      {/* Complete profile banner */}
+      {profile && !profile.onboarding_complete && (
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-accent/10 border border-accent/20 rounded-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
+              <User className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <p className="text-white text-sm font-medium">Complete your profile</p>
+              <p className="text-[#a1a1aa] text-xs">Personalise AI analysis for your industry and business type</p>
+            </div>
+          </div>
+          <Link
+            href="/onboarding"
+            className="shrink-0 text-xs text-accent hover:text-accent-hover font-semibold transition-colors flex items-center gap-1"
+          >
+            Complete setup <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      )}
+
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
+        <h1 className="text-2xl font-semibold text-white">
+          {profile?.full_name ? `Welcome back, ${profile.full_name.split(' ')[0]}` : 'Dashboard'}
+        </h1>
         <p className="text-[#a1a1aa] mt-1 text-sm">
-          {allContracts.length} contract{allContracts.length !== 1 ? 's' : ''} in your portfolio
+          {profile?.industry
+            ? `${allContracts.length} contract${allContracts.length !== 1 ? 's' : ''} · ${profile.industry}`
+            : `${allContracts.length} contract${allContracts.length !== 1 ? 's' : ''} in your portfolio`}
         </p>
       </div>
 

@@ -12,6 +12,20 @@ export async function GET(request: Request) {
     if (error) {
       return NextResponse.redirect(`${origin}/login?error=Could+not+sign+in+with+Google`)
     }
+
+    // Route new users to onboarding, returning users to dashboard
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: profile } = await supabase
+        .from('users')
+        .select('onboarding_complete')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile?.onboarding_complete) {
+        return NextResponse.redirect(`${origin}/onboarding`)
+      }
+    }
   }
 
   return NextResponse.redirect(`${origin}${next}`)

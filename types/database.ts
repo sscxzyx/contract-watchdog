@@ -1,6 +1,9 @@
 export type PlanTier = 'starter' | 'business' | 'agency'
 export type ContractStatus = 'active' | 'expiring_soon' | 'expired' | 'needs_review'
 export type RiskLevel = 'low' | 'medium' | 'high'
+export type BusinessType = 'sole_trader' | 'partnership' | 'company' | 'trust'
+export type ContractVolume = '1-5' | '5-20' | '20-50' | '50+'
+export type NotificationPref = 'email_only' | 'email_sms' | 'in_app_only'
 
 export interface User {
   id: string
@@ -10,6 +13,12 @@ export interface User {
   industry: string | null
   plan_tier: PlanTier
   onboarding_complete: boolean
+  business_type: BusinessType | null
+  contract_volume: ContractVolume | null
+  contract_types: string[]
+  biggest_headache: string | null
+  caught_out: string | null
+  personalisation_context: string | null
   created_at: string
 }
 
@@ -92,5 +101,7 @@ export interface UserSettings {
   alert_days_before: number[]
   email_alerts_enabled: boolean
   extra_recipients: string[]
+  notification_preference: NotificationPref
+  phone_number: string | null
   updated_at: string
 }

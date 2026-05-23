@@ -4,14 +4,32 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   User, Bell, CreditCard, Shield, Check,
-  Loader2, Plus, X, AlertTriangle, LogOut,
+  Loader2, Plus, X, AlertTriangle, LogOut, Briefcase,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { buildPersonalisationContext } from '@/lib/utils/personalisation'
 import type { User as UserType, UserSettings, PlanTier } from '@/types/database'
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
 const ALERT_DAY_OPTIONS = [7, 14, 30, 60, 90]
+
+const INDUSTRIES = [
+  'Construction/Trades', 'Hospitality/Café/Restaurant', 'Retail',
+  'Professional Services', 'Healthcare', 'Real Estate',
+  'Transport/Logistics', 'Creative/Marketing', 'Technology', 'Other',
+]
+
+const CONTRACT_TYPE_OPTIONS = [
+  'Commercial Lease', 'Supplier Agreements', 'Client Contracts',
+  'Employment Contracts', 'Subcontractor Agreements', 'Equipment Leases',
+  'Service Agreements', 'Partnership Agreements',
+]
+
+const HEADACHE_OPTIONS = [
+  'Missing renewal deadlines', 'Understanding legal language',
+  'Tracking obligations', 'Managing multiple contracts', 'Spotting risky clauses',
+]
 
 const PLAN_LIMITS: Record<PlanTier, number | null> = {
   starter: 5,
@@ -135,6 +153,18 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
   const [newRecipient, setNewRecipient] = useState('')
   const [savingNotifs, setSavingNotifs] = useState(false)
 
+  // Business profile state
+  const [bizType, setBizType] = useState(profile?.business_type ?? '')
+  const [contractVol, setContractVol] = useState(profile?.contract_volume ?? '')
+  const [bizContractTypes, setBizContractTypes] = useState<string[]>(profile?.contract_types ?? [])
+  const [bizHeadache, setBizHeadache] = useState(profile?.biggest_headache ?? '')
+  const [bizCaughtOut, setBizCaughtOut] = useState(profile?.caught_out ?? '')
+  const [savingBusiness, setSavingBusiness] = useState(false)
+
+  // Notification preference state
+  const [notifPref, setNotifPref] = useState(settings?.notification_preference ?? 'email_only')
+  const [phoneNumber, setPhoneNumber] = useState(settings?.phone_number ?? '')
+
   // Password state
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -168,14 +198,39 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
     flashSaved()
   }
 
+  // ── save business profile ───────────────────────────────────────────────────
+  async function saveBusinessProfile() {
+    setSavingBusiness(true)
+    const supabase = createClient()
+    const personalisationContext = buildPersonalisationContext({
+      businessType: bizType,
+      industry,
+      contractTypes: bizContractTypes,
+      biggestHeadache: bizHeadache,
+      contractVolume: contractVol,
+    })
+    await supabase.from('users').update({
+      business_type: bizType || null,
+      contract_volume: contractVol || null,
+      contract_types: bizContractTypes,
+      biggest_headache: bizHeadache || null,
+      caught_out: bizCaughtOut || null,
+      personalisation_context: personalisationContext || null,
+    }).eq('id', userId)
+    setSavingBusiness(false)
+    flashSaved()
+  }
+
   // ── save notifications ──────────────────────────────────────────────────────
   async function saveNotifications() {
     setSavingNotifs(true)
     const supabase = createClient()
     await supabase.from('user_settings').update({
       email_alerts_enabled: emailAlertsEnabled,
-      alert_days_before: alertDays.sort((a, b) => b - a),
+      alert_days_before: [...alertDays].sort((a, b) => b - a),
       extra_recipients: extraRecipients,
+      notification_preference: notifPref,
+      phone_number: phoneNumber.trim() || null,
     }).eq('user_id', userId)
     setSavingNotifs(false)
     flashSaved()
@@ -277,12 +332,14 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           </div>
           <div>
             <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Industry</label>
-            <input
+            <select
               value={industry}
               onChange={e => setIndustry(e.target.value)}
-              placeholder="e.g. Technology, Retail, Healthcare"
-              className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
-            />
+              className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors appearance-none"
+            >
+              <option value="">Select industry...</option>
+              {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+            </select>
           </div>
           <button
             onClick={saveProfile}
@@ -295,9 +352,153 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
         </div>
       </Section>
 
+      {/* ── Business Profile ── */}
+      <Section title="Business Profile" icon={Briefcase}>
+        <div className="space-y-5">
+          <p className="text-xs text-[#52525b] -mt-2">
+            These answers personalise Claude&apos;s contract analysis to your industry and situation.
+          </p>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Business type</label>
+              <select
+                value={bizType}
+                onChange={e => setBizType(e.target.value)}
+                className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors appearance-none"
+              >
+                <option value="">Select...</option>
+                <option value="sole_trader">Sole Trader</option>
+                <option value="partnership">Partnership</option>
+                <option value="company">Company</option>
+                <option value="trust">Trust</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Contract volume</label>
+              <select
+                value={contractVol}
+                onChange={e => setContractVol(e.target.value)}
+                className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors appearance-none"
+              >
+                <option value="">Select...</option>
+                <option value="1-5">1–5 contracts</option>
+                <option value="5-20">5–20 contracts</option>
+                <option value="20-50">20–50 contracts</option>
+                <option value="50+">50+ contracts</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-[#a1a1aa] mb-2 uppercase tracking-wide">Contract types you deal with</label>
+            <div className="flex flex-wrap gap-2">
+              {CONTRACT_TYPE_OPTIONS.map(t => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setBizContractTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t])}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                    bizContractTypes.includes(t)
+                      ? 'bg-accent/10 text-accent border-accent/20'
+                      : 'bg-[#1a1a1a] text-[#a1a1aa] border-[#27272a] hover:border-[#3f3f46] hover:text-white'
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Biggest contract headache</label>
+            <select
+              value={bizHeadache}
+              onChange={e => setBizHeadache(e.target.value)}
+              className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors appearance-none"
+            >
+              <option value="">Select...</option>
+              {HEADACHE_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Have you been caught out by a clause?</label>
+            <select
+              value={bizCaughtOut}
+              onChange={e => setBizCaughtOut(e.target.value)}
+              className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors appearance-none"
+            >
+              <option value="">Select...</option>
+              <option value="yes_costly">Yes, it cost me money</option>
+              <option value="yes_caught">Yes, but caught it in time</option>
+              <option value="not_yet">Not yet, but worried</option>
+              <option value="no_never">No, never</option>
+            </select>
+          </div>
+
+          <button
+            onClick={saveBusinessProfile}
+            disabled={savingBusiness}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
+          >
+            {savingBusiness ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+            {savingBusiness ? 'Saving…' : 'Save business profile'}
+          </button>
+        </div>
+      </Section>
+
       {/* ── Notifications ── */}
       <Section title="Notifications" icon={Bell}>
         <div className="space-y-6">
+          {/* Notification preference */}
+          <div>
+            <p className="text-sm text-white font-medium mb-1">Alert method</p>
+            <p className="text-xs text-[#a1a1aa] mb-3">How you want to receive deadline notifications</p>
+            <div className="space-y-2">
+              {([
+                { value: 'email_only', label: 'Email only', desc: 'Alerts sent to your inbox' },
+                { value: 'email_sms', label: 'Email + SMS', desc: 'Email and text message alerts' },
+                { value: 'in_app_only', label: 'In-app only', desc: 'Dashboard notifications only' },
+              ] as const).map(p => (
+                <button
+                  key={p.value}
+                  type="button"
+                  onClick={() => setNotifPref(p.value)}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm border transition-colors ${
+                    notifPref === p.value
+                      ? 'bg-accent/10 border-accent/30'
+                      : 'bg-[#1a1a1a] border-[#27272a] hover:border-[#3f3f46]'
+                  }`}
+                >
+                  <div className="text-left">
+                    <p className={`font-medium text-sm ${notifPref === p.value ? 'text-white' : 'text-[#a1a1aa]'}`}>{p.label}</p>
+                    <p className="text-xs text-[#52525b]">{p.desc}</p>
+                  </div>
+                  {notifPref === p.value && (
+                    <div className="w-4 h-4 rounded-full bg-accent flex items-center justify-center shrink-0">
+                      <Check className="w-2.5 h-2.5 text-white" />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+            {notifPref === 'email_sms' && (
+              <div className="mt-3">
+                <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">
+                  Phone number <span className="text-[#52525b] normal-case font-normal">(optional)</span>
+                </label>
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={e => setPhoneNumber(e.target.value)}
+                  placeholder="+61 400 000 000"
+                  className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+                />
+              </div>
+            )}
+          </div>
+
           {/* Email alerts toggle */}
           <div className="flex items-center justify-between">
             <div>
@@ -400,9 +601,9 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           {/* Plan comparison */}
           <div className="space-y-2">
             {([
-              { tier: 'starter', label: 'Starter', price: 'Free', limit: '5 contracts', features: ['AI analysis', 'Email alerts', 'Contract vault'] },
-              { tier: 'business', label: 'Business', price: '£19/mo', limit: '25 contracts', features: ['Everything in Starter', 'Priority support', 'Custom alert days'] },
-              { tier: 'agency', label: 'Agency', price: '£49/mo', limit: 'Unlimited contracts', features: ['Everything in Business', 'Multiple team members', 'API access'] },
+              { tier: 'starter', label: 'Starter', price: 'A$29/mo', limit: '5 contracts', features: ['AI analysis', 'Email alerts', 'Plain English summaries'] },
+              { tier: 'business', label: 'Business', price: 'A$59/mo', limit: '25 contracts', features: ['Everything in Starter', 'Email + SMS alerts', 'Risk scoring & flags'] },
+              { tier: 'agency', label: 'Agency', price: 'A$149/mo', limit: 'Unlimited contracts', features: ['Everything in Business', 'White label ready', 'API access'] },
             ] as const).map(plan => (
               <div
                 key={plan.tier}

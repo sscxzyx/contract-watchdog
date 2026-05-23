@@ -63,7 +63,15 @@ export async function POST(request: Request) {
     )
   }
 
-  // 3. Analyse with Claude
+  // 3. Analyse with Claude (inject user personalisation context if available)
+  const { data: userProfile } = await supabase
+    .from('users')
+    .select('personalisation_context')
+    .eq('id', user.id)
+    .single()
+
+  const userContext = userProfile?.personalisation_context
+
   let analysis: AiAnalysis
   try {
     const message = await anthropic.messages.create({
@@ -71,7 +79,7 @@ export async function POST(request: Request) {
       max_tokens: 4096,
       messages: [{
         role: 'user',
-        content: `Analyse the following contract and return ONLY valid JSON — no markdown, no explanation, no preamble.
+        content: `${userContext ? `User context:\n${userContext}\n\n` : ''}Analyse the following contract and return ONLY valid JSON — no markdown, no explanation, no preamble.
 
 Return exactly this structure:
 {

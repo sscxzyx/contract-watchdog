@@ -463,7 +463,7 @@ function VaultContent() {
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <p className="text-[#a1a1aa] text-sm">No contracts match your search or filters.</p>
           <button
-            onClick={() => { setFilterStatus([]); setFilterRisk([]); setSearch('') }}
+            onClick={() => { setFilterStatus([]); setFilterRisk([]); setFilterType([]); setSearch('') }}
             className="mt-3 text-xs text-accent hover:text-accent-hover transition-colors"
           >
             Clear filters
