@@ -1,5 +1,11 @@
-import { redirect } from 'next/navigation'
+import type { Metadata } from 'next'
+import { Landing } from '@/components/marketing/Landing'
 
-export default function Home() {
-  redirect('/dashboard')
+export const metadata: Metadata = {
+  title: 'Controva AI — Never Miss A Deadline. Never Miss A Clause.',
+  description: 'AI-powered contract monitoring for Australian small businesses. Upload your contracts and Controva watches every deadline, flags every risk, and alerts you before it\'s too late.',
+}
+
+export default function HomePage() {
+  return <Landing />
 }
