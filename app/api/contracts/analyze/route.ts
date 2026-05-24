@@ -21,7 +21,37 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { filePath, fileName } = await request.json() as { filePath: string; fileName: string }
+  const body = await request.json().catch(() => null)
+  const { filePath, fileName } = (body ?? {}) as { filePath?: unknown; fileName?: unknown }
+
+  // Validate inputs
+  if (typeof filePath !== 'string' || typeof fileName !== 'string' || !filePath.trim() || !fileName.trim()) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
+  // Ensure the file belongs to the authenticated user
+  if (!filePath.startsWith(`${user.id}/`)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+  // Validate file extension server-side
+  const lower = fileName.toLowerCase()
+  if (!lower.endsWith('.pdf') && !lower.endsWith('.docx')) {
+    return NextResponse.json({ error: 'Only PDF and DOCX files are supported' }, { status: 400 })
+  }
+
+  // Rate limit: max 10 analyses per 24 hours per user
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const { count: recentCount } = await supabase
+    .from('contracts')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .gte('created_at', oneDayAgo)
+
+  if ((recentCount ?? 0) >= 10) {
+    return NextResponse.json(
+      { error: 'Daily analysis limit reached (10 per day). Please try again tomorrow.' },
+      { status: 429 }
+    )
+  }
 
   // 1. Download from Supabase Storage
   const { data: fileBlob, error: downloadError } = await supabase.storage
@@ -35,7 +65,6 @@ export async function POST(request: Request) {
   // 2. Extract text
   let extractedText = ''
   const buffer = Buffer.from(await fileBlob.arrayBuffer())
-  const lower = fileName.toLowerCase()
 
   try {
     if (lower.endsWith('.pdf')) {
