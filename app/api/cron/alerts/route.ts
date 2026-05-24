@@ -67,11 +67,11 @@ export async function GET(request: Request) {
         if (existing) { skipped++; continue }
 
         const contractName = (event.contracts as { contract_name?: string } | null)?.contract_name ?? 'Your contract'
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://clauseguard.app'
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://controva.co'
 
         try {
           await resend.emails.send({
-            from: 'ClauseGuard <alerts@clauseguard.app>',
+            from: 'Controva <alerts@controva.co>',
             to: recipients,
             subject: `${event.event_label} in ${days} day${days !== 1 ? 's' : ''} — ${contractName}`,
             html: buildEmailHtml({ contractName, eventLabel: event.event_label as string, days, eventDate: event.event_date as string, contractId: event.contract_id as string, siteUrl }),
@@ -118,7 +118,7 @@ function buildEmailHtml({ contractName, eventLabel, days, eventDate, contractId,
       <div style="width:32px;height:32px;background:#6366f1;border-radius:8px;display:flex;align-items:center;justify-content:center">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
-      <span style="color:white;font-weight:600;font-size:16px">ClauseGuard</span>
+      <span style="color:white;font-weight:600;font-size:16px">Controva</span>
     </div>
 
     <div style="background:#111111;border:1px solid #27272a;border-radius:12px;padding:28px">
@@ -142,7 +142,7 @@ function buildEmailHtml({ contractName, eventLabel, days, eventDate, contractId,
     </div>
 
     <p style="color:#52525b;font-size:12px;text-align:center;margin-top:24px;line-height:1.6">
-      You're receiving this because email alerts are enabled on your ClauseGuard account.<br>
+      You're receiving this because email alerts are enabled on your Controva account.<br>
       <a href="${siteUrl}/settings" style="color:#6366f1;text-decoration:none">Manage notification preferences</a>
     </p>
   </div>

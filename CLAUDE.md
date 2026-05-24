@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-ClauseGuard — an AI-powered contract monitoring platform for small businesses. Built as a SaaS web app with subscription tiers.
+Controva — an AI-powered contract monitoring platform for small businesses. Built as a SaaS web app with subscription tiers.
 
 **GitHub:** https://github.com/sscxzyx/contract-watchdog  
 **Local path:** `C:\Users\jaime\contract watchdog`

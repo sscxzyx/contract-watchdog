@@ -107,7 +107,7 @@ export default async function DashboardPage() {
         <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6">
           <Shield className="w-8 h-8 text-accent" />
         </div>
-        <h1 className="text-2xl font-semibold text-white mb-2">Welcome to ClauseGuard</h1>
+        <h1 className="text-2xl font-semibold text-white mb-2">Welcome to Controva</h1>
         <p className="text-[#a1a1aa] text-sm max-w-sm mb-8">
           Upload your first contract and let AI analyse it for risks, key dates, and obligations — in under 30 seconds.
         </p>

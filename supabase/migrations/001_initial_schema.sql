@@ -1,4 +1,4 @@
--- ClauseGuard initial schema
+-- Controva initial schema
 -- Run this in the Supabase SQL editor for your project
 
 -- ─────────────────────────────────────────

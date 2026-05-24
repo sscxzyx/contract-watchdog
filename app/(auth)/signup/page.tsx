@@ -86,7 +86,7 @@ export default function SignupPage() {
           <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
             <Shield className="w-4 h-4 text-white" />
           </div>
-          <span className="text-white font-semibold text-lg tracking-tight">ClauseGuard</span>
+          <span className="text-white font-semibold text-lg tracking-tight">Controva</span>
         </div>
 
         <div className="bg-surface border border-[#27272a] rounded-xl p-6">

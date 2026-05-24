@@ -49,7 +49,7 @@ export default function OnboardingWizard({ userId, initialName }: Props) {
           <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
             <Shield className="w-4 h-4 text-white" />
           </div>
-          <span className="text-white font-semibold text-lg tracking-tight">ClauseGuard</span>
+          <span className="text-white font-semibold text-lg tracking-tight">Controva</span>
         </div>
 
         {/* Step indicators */}

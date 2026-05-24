@@ -345,7 +345,7 @@ export default function OnboardingPage() {
           <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
             <Shield className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="text-white font-semibold tracking-tight">ClauseGuard</span>
+          <span className="text-white font-semibold tracking-tight">Controva</span>
         </div>
         {step > 0 && (
           <button

@@ -25,7 +25,7 @@ export default function Sidebar() {
         <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center shrink-0">
           <Shield className="w-4 h-4 text-white" />
         </div>
-        <span className="text-white font-semibold text-[15px] tracking-tight">ClauseGuard</span>
+        <span className="text-white font-semibold text-[15px] tracking-tight">Controva</span>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5">
@@ -70,7 +70,7 @@ export default function Sidebar() {
           <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
             <Shield className="w-4 h-4 text-white" />
           </div>
-          <span className="text-white font-semibold text-[15px] tracking-tight">ClauseGuard</span>
+          <span className="text-white font-semibold text-[15px] tracking-tight">Controva</span>
         </div>
         <button
           onClick={() => setOpen(o => !o)}
