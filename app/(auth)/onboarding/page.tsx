@@ -14,8 +14,8 @@ import type { PlanTier, BusinessType, ContractVolume, NotificationPref } from '@
 
 const STEP_LABELS = ['Choose plan', 'Your business', 'Your contracts', 'Notifications']
 
-const PLAN_MONTHLY: Record<PlanTier, number> = { starter: 29, business: 59, agency: 190 }
-const PLAN_ANNUAL: Record<PlanTier, number> = { starter: 23, business: 47, agency: 152 }
+const PLAN_MONTHLY: Record<PlanTier, number> = { free: 0, starter: 29, business: 59, agency: 190 }
+const PLAN_ANNUAL: Record<PlanTier, number> = { free: 0, starter: 23, business: 47, agency: 152 }
 
 const BUSINESS_TYPES: { value: BusinessType; label: string }[] = [
   { value: 'sole_trader', label: 'Sole Trader' },
@@ -132,15 +132,23 @@ function PlanCard({ plan, price, annual, isPopular, features, onSelect, saving }
         {plan.charAt(0).toUpperCase() + plan.slice(1)}
       </p>
 
-      <div className="flex items-end gap-1.5 mb-1">
-        <span className="text-4xl font-bold text-white">A${price}</span>
-        <span className="text-[#a1a1aa] text-sm mb-1.5">/mo</span>
-      </div>
-
       {annual ? (
-        <p className="text-xs text-green-400 mb-5">Billed annually · 20% off</p>
+        <>
+          <div className="flex items-end gap-1.5 mb-1">
+            <span className="text-4xl font-bold text-white">A${price * 12}</span>
+            <span className="text-[#a1a1aa] text-sm mb-1.5">/yr</span>
+          </div>
+          <p className="text-xs text-[#a1a1aa] mb-1">A${price}/mo</p>
+          <p className="text-xs text-green-400 mb-4">Billed annually · 20% off</p>
+        </>
       ) : (
-        <p className="text-xs text-[#52525b] mb-5">Billed monthly</p>
+        <>
+          <div className="flex items-end gap-1.5 mb-1">
+            <span className="text-4xl font-bold text-white">A${price}</span>
+            <span className="text-[#a1a1aa] text-sm mb-1.5">/mo</span>
+          </div>
+          <p className="text-xs text-[#52525b] mb-5">Billed monthly</p>
+        </>
       )}
 
       <div className="space-y-2.5 flex-1 mb-6">
@@ -395,7 +403,7 @@ export default function OnboardingPage() {
                 plan="starter"
                 price={billing === 'annual' ? PLAN_ANNUAL.starter : PLAN_MONTHLY.starter}
                 annual={billing === 'annual'}
-                features={['Up to 5 contracts', 'AI contract analysis', 'Email alerts', 'Plain English summaries', '1 user']}
+                features={['Up to 15 contracts', 'AI contract analysis', 'Email alerts', 'Plain English summaries', '1 user']}
                 onSelect={() => selectPlan('starter')}
                 saving={saving && selectedPlan === 'starter'}
               />
@@ -404,7 +412,7 @@ export default function OnboardingPage() {
                 price={billing === 'annual' ? PLAN_ANNUAL.business : PLAN_MONTHLY.business}
                 annual={billing === 'annual'}
                 isPopular
-                features={['Up to 25 contracts', 'AI contract analysis', 'Email + SMS alerts', 'Risk scoring and flags', '90 day advance warnings', '3 users']}
+                features={['Up to 30 contracts', 'AI contract analysis', 'Email + SMS alerts', 'Risk scoring and flags', '90 day advance warnings', '3 users']}
                 onSelect={() => selectPlan('business')}
                 saving={saving && selectedPlan === 'business'}
               />

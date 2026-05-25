@@ -340,12 +340,12 @@ function Pricing() {
   const plans = [
     {
       name: 'Starter', price: 29,
-      features: ['Up to 5 contracts', 'AI contract analysis', 'Email alerts', 'Plain English summaries', '1 user'],
+      features: ['Up to 15 contracts', 'AI contract analysis', 'Email alerts', 'Plain English summaries', '1 user'],
       cta: 'Start Free Trial', popular: false,
     },
     {
       name: 'Business', price: 59,
-      features: ['Up to 25 contracts', 'AI analysis + risk scoring', 'Email and SMS alerts', '90-day advance warnings', 'Team access (3 users)', 'Priority support'],
+      features: ['Up to 30 contracts', 'AI analysis + risk scoring', 'Email and SMS alerts', '90-day advance warnings', 'Team access (3 users)', 'Priority support'],
       cta: 'Start Free Trial', popular: true,
     },
     {
@@ -400,12 +400,19 @@ function Pricing() {
                   </span>
                 )}
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{p.name}</h3>
-                <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-4xl font-semibold tracking-tight">${fmt(p.price)}</span>
-                  <span className="text-sm text-muted-foreground">AUD/month</span>
-                </div>
-                {annual && (
-                  <p className="text-xs text-success mt-1">Billed annually</p>
+                {annual ? (
+                  <>
+                    <div className="mt-3 flex items-baseline gap-1">
+                      <span className="text-4xl font-semibold tracking-tight">${fmt(p.price) * 12}</span>
+                      <span className="text-sm text-muted-foreground">AUD/year</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">${fmt(p.price)}/mo</p>
+                  </>
+                ) : (
+                  <div className="mt-3 flex items-baseline gap-1">
+                    <span className="text-4xl font-semibold tracking-tight">${fmt(p.price)}</span>
+                    <span className="text-sm text-muted-foreground">AUD/month</span>
+                  </div>
                 )}
                 <ul className="mt-6 space-y-3 flex-1">
                   {p.features.map((f) => (

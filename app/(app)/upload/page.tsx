@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, FileText, X, Shield, CheckCircle, AlertCircle, Loader2, Zap } from 'lucide-react'
+import { Upload, FileText, X, Shield, CheckCircle, AlertCircle, Loader2, Zap, Clock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { PlanTier } from '@/types/database'
 
@@ -27,12 +27,14 @@ const ACCEPTED = [
 ]
 
 const PLAN_LIMITS: Record<PlanTier, number | null> = {
-  starter: 5,
-  business: 25,
+  free: 1,
+  starter: 15,
+  business: 30,
   agency: null,
 }
 
 const PLAN_LABEL: Record<PlanTier, string> = {
+  free: 'Free',
   starter: 'Starter',
   business: 'Business',
   agency: 'Agency',
@@ -45,6 +47,20 @@ function UpgradeModal({ currentPlan, contractCount, onClose }: {
   contractCount: number
   onClose: () => void
 }) {
+  const [loading, setLoading] = useState<string | null>(null)
+
+  async function upgrade(plan: PlanTier) {
+    setLoading(plan)
+    const res = await fetch('/api/stripe/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan }),
+    })
+    const { url } = await res.json()
+    if (url) window.location.href = url
+    else setLoading(null)
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-surface border border-[#27272a] rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
@@ -63,12 +79,13 @@ function UpgradeModal({ currentPlan, contractCount, onClose }: {
           </button>
         </div>
 
-        <div className="space-y-2 mb-6">
+        <div className="space-y-2 mb-4">
           {([
-            { tier: 'starter', label: 'Starter', price: 'Free', limit: '5 contracts' },
-            { tier: 'business', label: 'Business', price: '£19/mo', limit: '25 contracts' },
-            { tier: 'agency', label: 'Agency', price: 'A$190/mo', limit: 'Unlimited + 50GB' },
-          ] as const).map(plan => (
+            { tier: 'free' as const, label: 'Free', price: 'A$0', limit: '1 contract · 1 scan/month' },
+            { tier: 'starter' as const, label: 'Starter', price: 'A$29/mo', limit: '10 contracts · 14-day trial' },
+            { tier: 'business' as const, label: 'Business', price: 'A$59/mo', limit: '30 contracts · 14-day trial' },
+            { tier: 'agency' as const, label: 'Agency', price: 'A$190/mo', limit: 'Unlimited + 50GB' },
+          ]).map(plan => (
             <div
               key={plan.tier}
               className={`flex items-center justify-between p-3.5 rounded-xl border transition-colors ${
@@ -80,25 +97,26 @@ function UpgradeModal({ currentPlan, contractCount, onClose }: {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-white">{plan.label}</span>
-                  {plan.tier === currentPlan && (
-                    <span className="text-xs text-accent">Current</span>
-                  )}
+                  {plan.tier === currentPlan && <span className="text-xs text-accent">Current</span>}
                 </div>
                 <p className="text-xs text-[#a1a1aa]">{plan.limit}</p>
               </div>
-              <div className="text-right">
+              <div className="text-right flex items-center gap-3">
                 <p className="text-sm font-semibold text-white">{plan.price}</p>
-                {plan.tier !== currentPlan && plan.tier !== 'starter' && (
-                  <p className="text-xs text-[#52525b]">coming soon</p>
+                {plan.tier !== currentPlan && plan.tier !== 'free' && (
+                  <button
+                    onClick={() => upgrade(plan.tier)}
+                    disabled={loading !== null}
+                    className="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-xs font-medium transition-colors flex items-center gap-1.5"
+                  >
+                    {loading === plan.tier && <Loader2 className="w-3 h-3 animate-spin" />}
+                    Upgrade
+                  </button>
                 )}
               </div>
             </div>
           ))}
         </div>
-
-        <p className="text-xs text-[#a1a1aa] text-center">
-          Stripe billing is coming soon. <a href="/settings" className="text-accent hover:underline">View billing settings</a>
-        </p>
       </div>
     </div>
   )
@@ -145,16 +163,29 @@ export default function UploadPage() {
 
     // Tier enforcement: check contract count vs plan limit
     const [{ data: profile }, { count }] = await Promise.all([
-      supabase.from('users').select('plan_tier').eq('id', user.id).single(),
+      supabase.from('users').select('plan_tier, free_scan_reset_at').eq('id', user.id).single(),
       supabase.from('contracts').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
     ])
-    const planTier = ((profile?.plan_tier as PlanTier | undefined) ?? 'starter') as PlanTier
+    const planTier = ((profile?.plan_tier as PlanTier | undefined) ?? 'free') as PlanTier
     const limit = PLAN_LIMITS[planTier]
     const contractCount = count ?? 0
 
     if (limit !== null && contractCount >= limit) {
       setLimitModal({ plan: planTier, count: contractCount })
       return
+    }
+
+    // Free tier: enforce 1 scan per 30 days
+    if (planTier === 'free' && profile?.free_scan_reset_at) {
+      const daysSince = (Date.now() - new Date(profile.free_scan_reset_at).getTime()) / 86400000
+      if (daysSince < 30) {
+        const daysLeft = Math.ceil(30 - daysSince)
+        setState({
+          status: 'error',
+          message: `Your free scan resets in ${daysLeft} day${daysLeft === 1 ? '' : 's'}. Upgrade to scan anytime.`,
+        })
+        return
+      }
     }
 
     // Upload to Supabase Storage
@@ -193,6 +224,11 @@ export default function UploadPage() {
     }
 
     const { contractId } = await response.json() as { contractId: string }
+
+    if (planTier === 'free') {
+      await supabase.from('users').update({ free_scan_reset_at: new Date().toISOString() }).eq('id', user.id)
+    }
+
     router.push(`/contracts/${contractId}`)
   }
 
