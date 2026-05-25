@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import {
   LayoutGrid, List, Search, Upload, FileText,
-  ChevronUp, ChevronDown, ChevronsUpDown, X,
+  ChevronUp, ChevronDown, ChevronsUpDown, X, Lock, Zap, Loader2,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -215,6 +215,20 @@ function VaultContent() {
   const [contracts, setContracts] = useState<ContractRow[]>([])
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState(false)
+  const [planTier, setPlanTier] = useState<string | null>(null)
+  const [upgrading, setUpgrading] = useState(false)
+
+  async function handleUpgrade() {
+    setUpgrading(true)
+    const res = await fetch('/api/stripe/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: 'starter' }),
+    })
+    const { url } = await res.json()
+    if (url) window.location.href = url
+    else setUpgrading(false)
+  }
   const [view, setView] = useState<ViewMode>('grid')
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('created_at')
@@ -231,14 +245,18 @@ function VaultContent() {
     else if (f === 'high_risk') setFilterRisk(['high'])
   }, [searchParams])
 
-  // Fetch contracts
+  // Fetch plan tier + contracts
   useEffect(() => {
     async function load() {
       const supabase = createClient()
-      const { data, error } = await supabase
-        .from('contracts')
-        .select('id, contract_name, counterparty_name, contract_type, status, risk_level, health_score, contract_value, value_currency, end_date, created_at, ai_summary, contract_events(id, event_date, event_label)')
-        .order('created_at', { ascending: false })
+      const [{ data: profile }, { data, error }] = await Promise.all([
+        supabase.from('users').select('plan_tier').single(),
+        supabase
+          .from('contracts')
+          .select('id, contract_name, counterparty_name, contract_type, status, risk_level, health_score, contract_value, value_currency, end_date, created_at, ai_summary, contract_events(id, event_date, event_label)')
+          .order('created_at', { ascending: false }),
+      ])
+      setPlanTier(profile?.plan_tier ?? 'free')
       if (error) {
         setFetchError(true)
       } else {
@@ -301,6 +319,30 @@ function VaultContent() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <p className="text-red-400 text-sm mb-2">Failed to load contracts</p>
         <p className="text-[#52525b] text-xs">Check your connection and refresh the page</p>
+      </div>
+    )
+  }
+
+  // ── free tier gate ───────────────────────────────────────────────────────
+  if (planTier === 'free') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6">
+          <Lock className="w-8 h-8 text-accent" />
+        </div>
+        <h1 className="text-xl font-semibold text-white mb-2">Vault is a paid feature</h1>
+        <p className="text-[#a1a1aa] text-sm max-w-xs mb-8">
+          Upgrade to Starter to browse, search, and manage all your contracts in one place.
+        </p>
+        <button
+          onClick={handleUpgrade}
+          disabled={upgrading}
+          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors"
+        >
+          {upgrading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+          {upgrading ? 'Redirecting…' : 'Upgrade to Starter — A$29/mo'}
+        </button>
+        <p className="text-xs text-[#52525b] mt-3">14-day free trial · Cancel anytime</p>
       </div>
     )
   }

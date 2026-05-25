@@ -1,4 +1,4 @@
-export type PlanTier = 'starter' | 'business' | 'agency'
+export type PlanTier = 'free' | 'starter' | 'business' | 'agency'
 export type ContractStatus = 'active' | 'expiring_soon' | 'expired' | 'needs_review'
 export type RiskLevel = 'low' | 'medium' | 'high'
 export type BusinessType = 'sole_trader' | 'partnership' | 'company' | 'trust'
@@ -12,6 +12,9 @@ export interface User {
   company_name: string | null
   industry: string | null
   plan_tier: PlanTier
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  free_scan_reset_at: string | null
   onboarding_complete: boolean
   business_type: BusinessType | null
   contract_volume: ContractVolume | null
