@@ -150,8 +150,13 @@ ${extractedText.slice(0, 80000)}`,
     })
 
     const raw = message.content[0].type === 'text' ? message.content[0].text : ''
-    const match = raw.match(/\{[\s\S]*\}/)
-    if (!match) throw new Error('No JSON in response')
+    // Strip markdown code fences if Claude wrapped the JSON
+    const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
+    const match = stripped.match(/\{[\s\S]*\}/)
+    if (!match) {
+      console.error('[analyze] No JSON found in response. Raw:', raw.slice(0, 500))
+      throw new Error('No JSON in response')
+    }
     analysis = JSON.parse(match[0]) as AiAnalysis
   } catch (err) {
     console.error('[analyze] AI error:', err)
