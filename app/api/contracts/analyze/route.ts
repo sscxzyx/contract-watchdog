@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Anthropic from '@anthropic-ai/sdk'
 import { NextResponse } from 'next/server'
 import type { AiAnalysis } from '@/types/database'
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const admin = createAdminClient()
   const body = await request.json().catch(() => null)
   const { filePath, fileName } = (body ?? {}) as { filePath?: unknown; fileName?: unknown }
 
@@ -44,7 +46,7 @@ export async function POST(request: Request) {
 
   // Rate limit: max 10 analyses per 24 hours per user
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-  const { count: recentCount } = await supabase
+  const { count: recentCount } = await admin
     .from('contracts')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
@@ -168,7 +170,7 @@ ${extractedText.slice(0, 80000)}`,
     ? `${analysis.contract_type ?? 'Contract'} — ${analysis.counterparty_name}`
     : (analysis.contract_type ?? fileName)
 
-  const { data: contract, error: insertError } = await supabase
+  const { data: contract, error: insertError } = await admin
     .from('contracts')
     .insert({
       user_id: user.id,
@@ -201,7 +203,7 @@ ${extractedText.slice(0, 80000)}`,
   // 5. Insert contract_events for key_dates
   const validDates = (analysis.key_dates ?? []).filter(kd => kd.date && kd.label)
   if (validDates.length) {
-    await supabase.from('contract_events').insert(
+    await admin.from('contract_events').insert(
       validDates.map(kd => ({
         contract_id: contract.id,
         user_id: user.id,
