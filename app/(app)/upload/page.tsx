@@ -48,17 +48,28 @@ function UpgradeModal({ currentPlan, contractCount, onClose }: {
   onClose: () => void
 }) {
   const [loading, setLoading] = useState<string | null>(null)
+  const [upgradeError, setUpgradeError] = useState<string | null>(null)
 
   async function upgrade(plan: PlanTier) {
     setLoading(plan)
-    const res = await fetch('/api/stripe/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan }),
-    })
-    const { url } = await res.json()
-    if (url) window.location.href = url
-    else setLoading(null)
+    setUpgradeError(null)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      })
+      const body = await res.json()
+      if (body.url) {
+        window.location.href = body.url
+      } else {
+        setUpgradeError(body.error ?? 'Something went wrong — please try again.')
+        setLoading(null)
+      }
+    } catch {
+      setUpgradeError('Network error — please try again.')
+      setLoading(null)
+    }
   }
 
   return (
@@ -78,6 +89,10 @@ function UpgradeModal({ currentPlan, contractCount, onClose }: {
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {upgradeError && (
+          <p className="mb-3 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{upgradeError}</p>
+        )}
 
         <div className="space-y-2 mb-4">
           {([
