@@ -351,7 +351,7 @@ function Pricing() {
     {
       name: 'Agency', price: 190,
       features: ['Unlimited contracts + 50GB storage', 'Everything in Business', 'White-label option', 'API access', 'Unlimited users'],
-      cta: 'Contact Us', popular: false,
+      cta: 'Start Free Trial', popular: false,
     },
   ]
 
