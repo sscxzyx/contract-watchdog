@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { stripe, PRICE_IDS, TRIAL_DAYS } from '@/lib/stripe'
+import { getStripe, PRICE_IDS, TRIAL_DAYS } from '@/lib/stripe'
 import type { PlanTier } from '@/types/database'
 
 export async function POST(req: Request) {
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   // Find or create Stripe customer
   let customerId = profile?.stripe_customer_id
   if (!customerId) {
-    const customer = await stripe.customers.create({
+    const customer = await getStripe().customers.create({
       email: profile?.email ?? user.email,
       metadata: { supabase_user_id: user.id },
     })
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   const trialDays = TRIAL_DAYS[plan]
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
     line_items: [{ price: PRICE_IDS[plan], quantity: 1 }],
