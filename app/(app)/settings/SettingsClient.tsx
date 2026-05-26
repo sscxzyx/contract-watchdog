@@ -142,7 +142,7 @@ function DeleteModal({ onConfirm, onCancel, loading }: {
 
 const PLANS = [
   { tier: 'free' as const, label: 'Free', price: 'A$0', limit: '1 contract · 1 scan/month', features: ['AI analysis', 'Plain English summary', 'Risk flags'] },
-  { tier: 'starter' as const, label: 'Starter', price: 'A$29/mo', limit: '10 contracts', features: ['Everything in Free', 'Vault access', 'Email alerts', '14-day free trial'] },
+  { tier: 'starter' as const, label: 'Starter', price: 'A$29/mo', limit: '15 contracts', features: ['Everything in Free', 'Vault access', 'Email alerts', '14-day free trial'] },
   { tier: 'business' as const, label: 'Business', price: 'A$59/mo', limit: '30 contracts', features: ['Everything in Starter', 'Email + SMS alerts', '14-day free trial'] },
   { tier: 'agency' as const, label: 'Agency', price: 'A$190/mo', limit: 'Unlimited + 50GB', features: ['Everything in Business', 'White label ready', 'API access'] },
 ]

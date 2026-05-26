@@ -3,7 +3,7 @@ import Link from 'next/link'
 import {
   AlertTriangle, Clock, FileText, Upload,
   TrendingUp, Shield, Activity, ChevronRight,
-  Calendar, User,
+  Calendar, User, Zap,
 } from 'lucide-react'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -146,6 +146,27 @@ export default async function DashboardPage() {
   // ── render ─────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-8">
+
+      {/* Free tier upgrade banner */}
+      {profile?.plan_tier === 'free' && (
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-amber-400/10 border border-amber-400/20 rounded-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-400/20 flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4 text-amber-400" />
+            </div>
+            <div>
+              <p className="text-white text-sm font-medium">You&apos;re on the Free plan</p>
+              <p className="text-[#a1a1aa] text-xs">Upgrade to unlock Vault, full alerts, and up to 15 contracts</p>
+            </div>
+          </div>
+          <Link
+            href="/settings#billing"
+            className="shrink-0 text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors flex items-center gap-1 whitespace-nowrap"
+          >
+            Upgrade now <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      )}
 
       {/* Complete profile banner */}
       {profile && !profile.onboarding_complete && (

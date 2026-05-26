@@ -82,7 +82,7 @@ function UpgradeModal({ currentPlan, contractCount, onClose }: {
         <div className="space-y-2 mb-4">
           {([
             { tier: 'free' as const, label: 'Free', price: 'A$0', limit: '1 contract · 1 scan/month' },
-            { tier: 'starter' as const, label: 'Starter', price: 'A$29/mo', limit: '10 contracts · 14-day trial' },
+            { tier: 'starter' as const, label: 'Starter', price: 'A$29/mo', limit: '15 contracts · 14-day trial' },
             { tier: 'business' as const, label: 'Business', price: 'A$59/mo', limit: '30 contracts · 14-day trial' },
             { tier: 'agency' as const, label: 'Agency', price: 'A$190/mo', limit: 'Unlimited + 50GB' },
           ]).map(plan => (
