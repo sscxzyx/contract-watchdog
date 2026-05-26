@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Archive, Upload, Settings, Shield, Menu, X } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -12,9 +13,31 @@ const navItems = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
+const PLAN_LABEL: Record<string, string> = {
+  free: 'Free Plan',
+  starter: 'Starter Plan',
+  business: 'Business Plan',
+  agency: 'Agency Plan',
+}
+
+const PLAN_LIMIT: Record<string, string> = {
+  free: '1 contract limit',
+  starter: '15 contract limit',
+  business: '30 contract limit',
+  agency: 'Unlimited contracts',
+}
+
 export default function Sidebar() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [planTier, setPlanTier] = useState<string>('starter')
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.from('users').select('plan_tier').single().then(({ data }) => {
+      if (data?.plan_tier) setPlanTier(data.plan_tier)
+    })
+  }, [])
 
   // Close drawer on route change
   useEffect(() => { setOpen(false) }, [pathname])
@@ -50,8 +73,8 @@ export default function Sidebar() {
 
       <div className="px-3 py-4 border-t border-[#27272a]">
         <div className="px-3 py-2 rounded-lg bg-accent/5 border border-accent/20">
-          <p className="text-xs font-medium text-accent">Starter Plan</p>
-          <p className="text-xs text-[#a1a1aa] mt-0.5">5 contract limit</p>
+          <p className="text-xs font-medium text-accent">{PLAN_LABEL[planTier] ?? 'Starter Plan'}</p>
+          <p className="text-xs text-[#a1a1aa] mt-0.5">{PLAN_LIMIT[planTier] ?? '15 contract limit'}</p>
         </div>
       </div>
     </>
