@@ -65,8 +65,10 @@ export async function POST(request: Request) {
     .download(filePath)
 
   if (downloadError || !fileBlob) {
+    console.error('[analyze] Storage download error:', downloadError)
     return NextResponse.json({ error: 'Failed to retrieve uploaded file' }, { status: 500 })
   }
+  console.log('[analyze] Storage download OK')
 
   // 2. Extract text
   let extractedText = ''
@@ -84,7 +86,8 @@ export async function POST(request: Request) {
     } else {
       return NextResponse.json({ error: 'Only PDF and DOCX files are supported' }, { status: 400 })
     }
-  } catch {
+  } catch (err) {
+    console.error('[analyze] Text extraction error:', err)
     return NextResponse.json(
       { error: 'Could not extract text from this document. If it is a scanned image, it cannot be processed.' },
       { status: 422 }
@@ -97,6 +100,7 @@ export async function POST(request: Request) {
       { status: 422 }
     )
   }
+  console.log('[analyze] Text extracted, length:', extractedText.length)
 
   // 3. Analyse with Claude (inject user personalisation context if available)
   const { data: userProfile } = await supabase
@@ -160,6 +164,7 @@ ${extractedText.slice(0, 80000)}`,
       throw new Error('No JSON in response')
     }
     analysis = JSON.parse(match[0]) as AiAnalysis
+    console.log('[analyze] AI analysis OK')
   } catch (err) {
     console.error('[analyze] AI error:', err)
     return NextResponse.json({ error: 'AI analysis failed — please try again' }, { status: 500 })
@@ -197,8 +202,10 @@ ${extractedText.slice(0, 80000)}`,
     .single()
 
   if (insertError || !contract) {
+    console.error('[analyze] Contract insert error:', insertError)
     return NextResponse.json({ error: 'Failed to save contract — please try again' }, { status: 500 })
   }
+  console.log('[analyze] Contract saved, id:', contract.id)
 
   // 5. Insert contract_events for key_dates
   const validDates = (analysis.key_dates ?? []).filter(kd => kd.date && kd.label)
