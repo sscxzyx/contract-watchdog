@@ -600,7 +600,7 @@ function Footer() {
             </div>
           </div>
           <FooterCol title="Product" links={[['Features', '#features'], ['Pricing', '#pricing'], ['About', '#who']]} />
-          <FooterCol title="Company" links={[['Privacy Policy', '#'], ['Terms of Service', '#'], ['Contact', '#']]} />
+          <FooterCol title="Company" links={[['Privacy Policy', '#'], ['Terms of Service', '/terms'], ['Contact', 'mailto:legal@controva.co']]} />
         </div>
         <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
