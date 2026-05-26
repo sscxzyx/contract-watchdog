@@ -6,6 +6,10 @@ import type { AiAnalysis } from '@/types/database'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.error('[analyze] ANTHROPIC_API_KEY is not set')
+}
+
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 function getStatus(endDate: string | null): string {
@@ -149,7 +153,8 @@ ${extractedText.slice(0, 80000)}`,
     const match = raw.match(/\{[\s\S]*\}/)
     if (!match) throw new Error('No JSON in response')
     analysis = JSON.parse(match[0]) as AiAnalysis
-  } catch {
+  } catch (err) {
+    console.error('[analyze] AI error:', err)
     return NextResponse.json({ error: 'AI analysis failed — please try again' }, { status: 500 })
   }
 
