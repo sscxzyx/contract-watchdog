@@ -452,7 +452,7 @@ function Testimonials() {
     <section className="py-24 md:py-32 bg-surface">
       <div className="mx-auto max-w-6xl px-6">
         <Reveal>
-          <SectionEyebrow>Testimonials · illustrative examples</SectionEyebrow>
+          <SectionEyebrow>Testimonials</SectionEyebrow>
           <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-center max-w-3xl mx-auto leading-tight">
             What Australian <span className="text-gradient-indigo">business owners say</span>
           </h2>
