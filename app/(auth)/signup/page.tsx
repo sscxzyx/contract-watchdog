@@ -87,7 +87,7 @@ export default function SignupPage() {
           <Image
             src="/controva-logo.png"
             alt="Controva"
-            width={160}
+            width={226}
             height={40}
             className="h-10 w-auto"
             priority

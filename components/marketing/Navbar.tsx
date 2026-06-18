@@ -34,8 +34,8 @@ export function Navbar() {
           <Image
             src="/controva-logo.png"
             alt="Controva"
-            width={140}
-            height={36}
+            width={181}
+            height={32}
             className="h-8 w-auto drop-shadow-sm"
             priority
           />

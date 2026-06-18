@@ -353,8 +353,8 @@ export default function OnboardingPage() {
         <Image
           src="/controva-logo.png"
           alt="Controva"
-          width={120}
-          height={32}
+          width={158}
+          height={28}
           className="h-7 w-auto"
           priority
         />
