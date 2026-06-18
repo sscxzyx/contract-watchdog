@@ -5,9 +5,9 @@ import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 
 const links = [
-  { label: 'Features', href: '#features' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'About', href: '#who' },
+  { label: 'Features', href: '/#features' },
+  { label: 'Pricing', href: '/#pricing' },
+  { label: 'About', href: '/#who' },
 ]
 
 export function Navbar() {
@@ -30,7 +30,7 @@ export function Navbar() {
       }`}
     >
       <nav className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-        <a href="#" className="flex items-center">
+        <a href="/" className="flex items-center">
           <Image
             src="/controva-logo.png"
             alt="Controva"
