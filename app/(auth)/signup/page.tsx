@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Shield, Loader2, CheckCircle } from 'lucide-react'
+import Image from 'next/image'
+import { Loader2, CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function SignupPage() {
@@ -82,11 +83,15 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="flex items-center justify-center gap-2.5 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-            <Shield className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-white font-semibold text-lg tracking-tight">Controva</span>
+        <div className="flex items-center justify-center mb-8">
+          <Image
+            src="/controva-logo.png"
+            alt="Controva"
+            width={160}
+            height={40}
+            className="h-10 w-auto"
+            priority
+          />
         </div>
 
         <div className="bg-surface border border-[#27272a] rounded-xl p-6">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 
 const links = [
@@ -29,9 +30,15 @@ export function Navbar() {
       }`}
     >
       <nav className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-1 text-lg font-semibold tracking-tight">
-          <span>Controva</span>
-          <span className="text-primary">AI</span>
+        <a href="#" className="flex items-center">
+          <Image
+            src="/controva-logo.png"
+            alt="Controva"
+            width={140}
+            height={36}
+            className="h-8 w-auto drop-shadow-sm"
+            priority
+          />
         </a>
 
         <div className="hidden md:flex items-center gap-8">

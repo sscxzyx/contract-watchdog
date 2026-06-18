@@ -91,11 +91,14 @@ Middleware protects `/dashboard`, `/vault`, `/upload`, `/settings`, `/contracts`
 
 | Tier | Contract limit |
 |------|---------------|
-| starter | 5 |
-| business | 25 |
+| free | 1 (one scan / 30 days) |
+| starter | 15 |
+| business | 30 |
 | agency | unlimited |
 
-Enforcement is in `app/(app)/upload/page.tsx` — counts contracts before allowing upload. Upgrade modal shown at limit.
+Enforcement is in **two** places, both required:
+- `app/(app)/upload/page.tsx` — client pre-check + upgrade modal (UX).
+- `app/api/contracts/analyze/route.ts` — authoritative server-side check (the API is public, so the client check alone is bypassable).
 
 ## Cron alerts
 

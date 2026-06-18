@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Archive, Upload, Settings, Shield, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Archive, Upload, Settings, Menu, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
@@ -44,11 +45,15 @@ export default function Sidebar() {
 
   const nav = (
     <>
-      <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#27272a]">
-        <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center shrink-0">
-          <Shield className="w-4 h-4 text-white" />
-        </div>
-        <span className="text-white font-semibold text-[15px] tracking-tight">Controva</span>
+      <div className="flex items-center px-5 py-4 border-b border-[#27272a]">
+        <Image
+          src="/controva-logo.png"
+          alt="Controva"
+          width={120}
+          height={32}
+          className="h-7 w-auto"
+          priority
+        />
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5">
@@ -89,12 +94,14 @@ export default function Sidebar() {
 
       {/* ── Mobile top bar ── */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-surface border-b border-[#27272a] flex items-center justify-between px-4 z-50">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
-            <Shield className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-white font-semibold text-[15px] tracking-tight">Controva</span>
-        </div>
+        <Image
+          src="/controva-logo.png"
+          alt="Controva"
+          width={120}
+          height={32}
+          className="h-7 w-auto"
+          priority
+        />
         <button
           onClick={() => setOpen(o => !o)}
           className="p-2 rounded-lg text-[#a1a1aa] hover:text-white hover:bg-white/5 transition-colors"

@@ -240,9 +240,7 @@ export default function UploadPage() {
 
     const { contractId } = await response.json() as { contractId: string }
 
-    if (planTier === 'free') {
-      await supabase.from('users').update({ free_scan_reset_at: new Date().toISOString() }).eq('id', user.id)
-    }
+    // Note: free-tier scan window is recorded server-side in the analyze route.
 
     router.push(`/contracts/${contractId}`)
   }

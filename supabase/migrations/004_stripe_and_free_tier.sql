@@ -1,4 +1,4 @@
--- Migration 003: Stripe integration + free tier
+-- Migration 004: Stripe integration + free tier
 -- Run this in the Supabase SQL editor
 
 -- ── 1. Update plan_tier on users ─────────────────────────────────────────────

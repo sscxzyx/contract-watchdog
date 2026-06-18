@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import {
-  Shield, Check, ArrowRight, ArrowLeft,
+  Check, ArrowRight, ArrowLeft,
   Loader2, Star, Zap, Building2, FileText, Bell,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -349,12 +350,14 @@ export default function OnboardingPage() {
 
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 h-14 border-b border-[#111111]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
-            <Shield className="w-3.5 h-3.5 text-white" />
-          </div>
-          <span className="text-white font-semibold tracking-tight">Controva</span>
-        </div>
+        <Image
+          src="/controva-logo.png"
+          alt="Controva"
+          width={120}
+          height={32}
+          className="h-7 w-auto"
+          priority
+        />
         {step > 0 && (
           <button
             onClick={handleSkip}
@@ -543,7 +546,7 @@ export default function OnboardingPage() {
                 <FileText className="w-6 h-6 text-accent" />
               </div>
               <h1 className="text-2xl font-bold text-white mb-1">About your contracts</h1>
-              <p className="text-[#a1a1aa] text-sm">We'll use this to give you more relevant analysis</p>
+              <p className="text-[#a1a1aa] text-sm">We&apos;ll use this to give you more relevant analysis</p>
             </div>
 
             <div className="bg-surface border border-[#27272a] rounded-2xl p-6 space-y-6">
@@ -573,7 +576,7 @@ export default function OnboardingPage() {
               {/* Biggest headache */}
               <div>
                 <label className="block text-xs font-semibold text-[#a1a1aa] mb-3 uppercase tracking-wide">
-                  What's your biggest contract headache?
+                  What&apos;s your biggest contract headache?
                 </label>
                 <div className="space-y-2">
                   {HEADACHE_OPTIONS.map(h => (

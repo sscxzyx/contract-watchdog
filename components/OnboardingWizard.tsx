@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Shield, Building2, Upload, CheckCircle, ArrowRight, Loader2 } from 'lucide-react'
+import Image from 'next/image'
+import { Building2, Upload, CheckCircle, ArrowRight, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
@@ -45,11 +46,15 @@ export default function OnboardingWizard({ userId, initialName }: Props) {
     <div className="fixed inset-0 bg-background z-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-2.5 mb-10">
-          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-            <Shield className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-white font-semibold text-lg tracking-tight">Controva</span>
+        <div className="flex items-center justify-center mb-10">
+          <Image
+            src="/controva-logo.png"
+            alt="Controva"
+            width={160}
+            height={40}
+            className="h-10 w-auto"
+            priority
+          />
         </div>
 
         {/* Step indicators */}
