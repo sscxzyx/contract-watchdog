@@ -10,11 +10,16 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: #0a0a0a;
   color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 ::-webkit-scrollbar {
@@ -35,17 +40,21 @@ body {
   background: #3f3f46;
 }
 
-/* ── Marketing / Landing page utilities ─────────────────────────────────── */
+/* ── Reveal ────────────────────────────────────────────────────────────── */
 
 .reveal {
   opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.55s ease, transform 0.55s ease;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
 }
 .reveal.in-view {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ── Gradients ─────────────────────────────────────────────────────────── */
 
 .text-gradient {
   background: linear-gradient(to right, #ffffff, #a1a1aa);
@@ -55,24 +64,311 @@ body {
 }
 
 .text-gradient-indigo {
-  background: linear-gradient(to right, #6366f1, #818cf8);
+  background: linear-gradient(90deg, #a5b4fc 0%, #6366f1 30%, #8b5cf6 60%, #6366f1 100%);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: gradient-shift 8s ease-in-out infinite;
 }
+
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    #a1a1aa 0%,
+    #ffffff 20%,
+    #a5b4fc 40%,
+    #ffffff 60%,
+    #a1a1aa 80%,
+    #a1a1aa 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 6s linear infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* ── Backgrounds ───────────────────────────────────────────────────────── */
 
 .bg-grid {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.bg-grid-fine {
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 .bg-radial-glow {
-  background: radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.14) 0%, transparent 65%);
 }
 
 .mask-fade-b {
-  -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+}
+
+.mask-radial {
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+}
+
+/* ── Aurora / conic beams ──────────────────────────────────────────────── */
+
+.aurora {
+  position: absolute;
+  inset: -20% -20% auto -20%;
+  height: 900px;
+  background:
+    radial-gradient(60% 45% at 20% 40%, rgba(99, 102, 241, 0.35), transparent 60%),
+    radial-gradient(50% 40% at 80% 30%, rgba(139, 92, 246, 0.30), transparent 60%),
+    radial-gradient(50% 40% at 50% 70%, rgba(56, 189, 248, 0.20), transparent 60%);
+  filter: blur(80px);
+  animation: aurora-drift 22s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes aurora-drift {
+  0%   { transform: translate3d(-2%, 0, 0) rotate(0deg); opacity: 0.9; }
+  50%  { transform: translate3d(4%, -1%, 0) rotate(3deg); opacity: 1; }
+  100% { transform: translate3d(-3%, 1%, 0) rotate(-2deg); opacity: 0.85; }
+}
+
+.conic-beam {
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(from 210deg at 50% 50%,
+    transparent 0deg,
+    rgba(99, 102, 241, 0.15) 45deg,
+    transparent 90deg,
+    rgba(139, 92, 246, 0.12) 180deg,
+    transparent 270deg
+  );
+  animation: conic-spin 24s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes conic-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Float / breathe / pulse ───────────────────────────────────────────── */
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float-y 6s ease-in-out infinite;
+}
+.animate-float-slow {
+  animation: float-y 9s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+.pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid currentColor;
+  animation: pulse-ring 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* ── Shine sweep for buttons / cards ──────────────────────────────────── */
+
+.shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.shine::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -150%;
+  width: 60%; height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 80%
+  );
+  transform: skewX(-20deg);
+  transition: left 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+.shine:hover::before {
+  left: 150%;
+}
+
+/* ── Scan line for AI processing feel ─────────────────────────────────── */
+
+@keyframes scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(1000%); opacity: 0; }
+}
+.scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(99, 102, 241, 0.9),
+    rgba(139, 92, 246, 0.9),
+    transparent
+  );
+  box-shadow: 0 0 24px rgba(99, 102, 241, 0.8);
+  animation: scan 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Marquee ──────────────────────────────────────────────────────────── */
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 32s linear infinite;
+}
+.animate-marquee-slow {
+  animation: marquee 60s linear infinite;
+}
+
+/* ── SVG flow — dashed lines animated for data flow ───────────────────── */
+
+@keyframes flow-dash {
+  to { stroke-dashoffset: -1000; }
+}
+.flow-line {
+  stroke-dasharray: 6 8;
+  animation: flow-dash 20s linear infinite;
+}
+
+@keyframes flow-particle {
+  0%   { offset-distance: 0%;   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* ── Cursor spotlight on cards ────────────────────────────────────────── */
+
+.card-spotlight {
+  position: relative;
+}
+.card-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    500px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(99, 102, 241, 0.15),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.card-spotlight:hover::before {
+  opacity: 1;
+}
+
+/* ── Glow border ──────────────────────────────────────────────────────── */
+
+.glow-border {
+  position: relative;
+}
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(99, 102, 241, 0.6),
+    rgba(139, 92, 246, 0.3),
+    rgba(56, 189, 248, 0.5)
+  );
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease-in-out infinite;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ── Number tick ──────────────────────────────────────────────────────── */
+
+@keyframes tick-up {
+  0% { transform: translateY(6px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* ── View swap fade — for interactive dashboard tabs ──────────────────── */
+
+@keyframes view-in {
+  0% { opacity: 0; transform: translateY(6px); filter: blur(4px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.view-fade {
+  animation: view-in 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Hide scrollbar (used for mobile tab strip) ───────────────────────── */
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Reduce motion ────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

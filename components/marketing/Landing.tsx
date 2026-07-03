@@ -3,21 +3,27 @@
 import {
   ArrowRight, Shield, Zap, Check, FileWarning, Bell, ShieldAlert,
   FolderLock, Activity, MapPin, Hammer, Coffee, Home, Briefcase,
-  Upload, Sparkles, BellRing, Plus, Minus, Lock,
-  Twitter, Linkedin,
+  Sparkles, BellRing, Plus, Minus, Lock,
+  Twitter, Linkedin, Clock, Eye,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Navbar } from './Navbar'
 import { DashboardMockup } from './DashboardMockup'
 import { Reveal } from './Reveal'
+import { WorkflowVisualization } from './WorkflowVisualization'
+import { AnimatedCounter } from './AnimatedCounter'
+import { SpotlightCard } from './SpotlightCard'
+import { ScrollProgress } from './ScrollProgress'
 
 export function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <ScrollProgress />
       <Navbar />
       <main>
         <Hero />
         <SocialProof />
+        <MetricsBand />
         <Problem />
         <Features />
         <WhoItsFor />
@@ -36,15 +42,50 @@ export function Landing() {
 function Hero() {
   return (
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
-      <div className="absolute inset-0 bg-grid mask-fade-b opacity-60" />
+      {/* Layered atmospheric background — Apple / DJI style */}
+      <div className="absolute inset-0 bg-grid mask-fade-b opacity-70" />
       <div className="absolute inset-0 bg-radial-glow" />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 size-[600px] rounded-full bg-primary/20 blur-[120px] -z-0" />
+      <div className="absolute inset-0 mask-radial">
+        <div className="aurora" />
+      </div>
+      <div className="absolute inset-0 mask-radial opacity-40">
+        <div className="conic-beam" />
+      </div>
+
+      {/* Floating chips — like DJI product page callouts */}
+      <FloatingBadge
+        className="hidden lg:flex left-[6%] top-[38%]"
+        delay={800}
+        icon={<Zap size={12} className="text-primary" />}
+        label="60 second analysis"
+      />
+      <FloatingBadge
+        className="hidden lg:flex right-[6%] top-[30%]"
+        delay={1000}
+        icon={<Shield size={12} className="text-primary" />}
+        label="Bank-level encryption"
+      />
+      <FloatingBadge
+        className="hidden lg:flex left-[8%] bottom-[18%]"
+        delay={1200}
+        icon={<Eye size={12} className="text-primary" />}
+        label="24/7 monitoring"
+      />
+      <FloatingBadge
+        className="hidden lg:flex right-[8%] bottom-[22%]"
+        delay={1400}
+        icon={<Clock size={12} className="text-primary" />}
+        label="Advance warnings"
+      />
 
       <div className="relative mx-auto max-w-6xl px-6">
         <Reveal>
           <div className="flex justify-center mb-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2/60 backdrop-blur px-3 py-1 text-xs text-muted-foreground">
-              <span className="size-1.5 rounded-full bg-primary shadow-glow-soft" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2/60 backdrop-blur px-3 py-1 text-xs text-muted-foreground shine">
+              <span className="relative flex size-1.5">
+                <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-75" />
+                <span className="relative rounded-full bg-primary size-1.5" />
+              </span>
               Built for Australian small business
             </span>
           </div>
@@ -70,14 +111,14 @@ function Hero() {
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
               href="/signup"
-              className="group inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow hover:bg-primary/90 transition-all"
+              className="group inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow hover:bg-primary/90 hover:shadow-glow hover:scale-[1.02] transition-all shine"
             >
               Start Free — No Card Required
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
             </a>
             <a
               href="#how"
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-surface-2/40 backdrop-blur px-6 py-3 text-sm font-medium hover:bg-surface-2 transition-all"
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-surface-2/40 backdrop-blur px-6 py-3 text-sm font-medium hover:bg-surface-2 hover:border-primary/30 transition-all"
             >
               See How It Works
             </a>
@@ -94,8 +135,8 @@ function Hero() {
         </Reveal>
 
         <Reveal delay={400}>
-          <div className="mt-16 relative">
-            <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full opacity-50" />
+          <div className="mt-16 relative animate-float-slow">
+            <div className="absolute -inset-8 bg-primary/25 blur-3xl rounded-full opacity-60" />
             <div className="relative">
               <DashboardMockup />
             </div>
@@ -103,6 +144,31 @@ function Hero() {
         </Reveal>
       </div>
     </section>
+  )
+}
+
+function FloatingBadge({
+  className = '', icon, label, delay = 0,
+}: { className?: string; icon: React.ReactNode; label: string; delay?: number }) {
+  return (
+    <div
+      className={`absolute z-10 opacity-0 animate-float ${className}`}
+      style={{
+        animation: `float-y 6s ease-in-out infinite`,
+        animationDelay: `${delay}ms, 0ms`,
+      }}
+    >
+      <div
+        className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2/70 backdrop-blur-md px-3 py-1.5 text-xs shadow-glow-soft opacity-0"
+        style={{
+          animation: 'tick-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+          animationDelay: `${delay}ms`,
+        }}
+      >
+        {icon}
+        {label}
+      </div>
+    </div>
   )
 }
 
@@ -114,18 +180,53 @@ function SocialProof() {
     { icon: <Home size={14} />, label: 'Real Estate' },
     { icon: <Briefcase size={14} />, label: 'Professional Services' },
   ]
+  // Duplicate for seamless marquee
+  const marqueeItems = [...items, ...items, ...items, ...items]
   return (
-    <section className="py-14 border-y border-border bg-surface">
+    <section className="py-14 border-y border-border bg-surface overflow-hidden">
       <div className="mx-auto max-w-6xl px-6">
         <p className="text-center text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          Trusted by tradies, cafés, real estate agents and small businesses across Australia
+          Built for tradies, cafés, real estate agents and small businesses across Australia
         </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-          {items.map((i) => (
-            <div key={i.label} className="flex items-center gap-2 text-sm text-muted-foreground">
+      </div>
+      <div className="mt-6 relative">
+        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-surface to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-surface to-transparent z-10 pointer-events-none" />
+        <div className="flex w-max animate-marquee gap-10">
+          {marqueeItems.map((i, idx) => (
+            <div key={`${i.label}-${idx}`} className="flex items-center gap-2 text-sm text-muted-foreground shrink-0">
               <span className="text-primary">{i.icon}</span>
               {i.label}
             </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─────────── METRICS BAND ─────────── */
+function MetricsBand() {
+  const metrics = [
+    { value: 60, suffix: 's', label: 'Average analysis time', gradient: 'from-primary to-secondary' },
+    { value: 100, suffix: '%', label: 'Australian contract law focused', gradient: 'from-secondary to-primary' },
+    { value: 90, suffix: ' days', label: 'Advance deadline warnings', gradient: 'from-primary to-secondary' },
+    { value: 24, suffix: '/7', label: 'Continuous monitoring', gradient: 'from-secondary to-primary' },
+  ]
+  return (
+    <section className="py-20 relative">
+      <div className="absolute inset-0 bg-dots opacity-40" />
+      <div className="relative mx-auto max-w-6xl px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4">
+          {metrics.map((m, i) => (
+            <Reveal key={m.label} delay={i * 90}>
+              <div className="text-center">
+                <div className={`text-4xl md:text-5xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r ${m.gradient}`}>
+                  <AnimatedCounter to={m.value} suffix={m.suffix} />
+                </div>
+                <p className="mt-2 text-xs md:text-sm text-muted-foreground">{m.label}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -165,13 +266,13 @@ function Problem() {
         <div className="mt-16 grid md:grid-cols-3 gap-5">
           {problems.map((p, i) => (
             <Reveal key={p.title} delay={i * 80}>
-              <div className="group h-full rounded-xl border border-border bg-card p-6 hover:border-danger/40 hover:bg-surface-2 transition-all">
-                <div className="size-10 rounded-lg bg-danger/10 border border-danger/20 text-danger grid place-items-center mb-5">
+              <SpotlightCard className="group h-full rounded-xl border border-border bg-card p-6 hover:border-danger/40 hover:-translate-y-1 transition-all duration-300">
+                <div className="size-10 rounded-lg bg-danger/10 border border-danger/20 text-danger grid place-items-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform">
                   {p.icon}
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{p.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{p.body}</p>
-              </div>
+              </SpotlightCard>
             </Reveal>
           ))}
         </div>
@@ -209,8 +310,9 @@ function Features() {
     },
   ]
   return (
-    <section id="features" className="py-24 md:py-32 bg-surface relative">
+    <section id="features" className="py-24 md:py-32 bg-surface relative overflow-hidden">
       <div className="absolute inset-0 bg-grid opacity-30 mask-fade-b" />
+      <div className="absolute -top-40 left-1/2 -translate-x-1/2 size-[500px] rounded-full bg-primary/10 blur-[120px]" />
       <div className="relative mx-auto max-w-6xl px-6">
         <Reveal>
           <SectionEyebrow>What it does</SectionEyebrow>
@@ -223,16 +325,16 @@ function Features() {
         <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {features.map((f, i) => (
             <Reveal key={f.title} delay={i * 60}>
-              <div className="group h-full rounded-xl border border-border bg-card p-6 hover:border-primary/40 hover:shadow-glow-soft transition-all relative overflow-hidden">
+              <SpotlightCard className="group h-full rounded-xl border border-border bg-card p-6 hover:border-primary/40 hover:shadow-glow-soft hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
                 <div className="absolute -top-12 -right-12 size-32 rounded-full bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative">
-                  <div className="size-10 rounded-lg bg-primary/10 border border-primary/20 text-primary grid place-items-center mb-5">
+                  <div className="size-10 rounded-lg bg-primary/10 border border-primary/20 text-primary grid place-items-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform">
                     {f.icon}
                   </div>
                   <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{f.body}</p>
                 </div>
-              </div>
+              </SpotlightCard>
             </Reveal>
           ))}
         </div>
@@ -273,9 +375,9 @@ function WhoItsFor() {
         <div className="mt-16 grid md:grid-cols-2 gap-5">
           {audiences.map((a, i) => (
             <Reveal key={a.title} delay={i * 70}>
-              <div className="group h-full rounded-xl border border-border bg-card p-7 hover:border-primary/30 hover:-translate-y-1 transition-all">
+              <SpotlightCard className="group h-full rounded-xl border border-border bg-card p-7 hover:border-primary/30 hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-start gap-4">
-                  <div className="size-12 shrink-0 rounded-xl bg-primary/10 border border-primary/20 text-primary grid place-items-center">
+                  <div className="size-12 shrink-0 rounded-xl bg-primary/10 border border-primary/20 text-primary grid place-items-center group-hover:scale-110 group-hover:rotate-3 transition-transform">
                     {a.icon}
                   </div>
                   <div>
@@ -283,7 +385,7 @@ function WhoItsFor() {
                     <p className="text-sm text-muted-foreground leading-relaxed">{a.body}</p>
                   </div>
                 </div>
-              </div>
+              </SpotlightCard>
             </Reveal>
           ))}
         </div>
@@ -294,38 +396,27 @@ function WhoItsFor() {
 
 /* ─────────── HOW IT WORKS ─────────── */
 function HowItWorks() {
-  const steps = [
-    { n: '01', icon: <Upload />, title: 'Upload your contracts', body: 'Drag and drop your PDFs or Word docs. Controva accepts any contract format.' },
-    { n: '02', icon: <Sparkles />, title: 'AI analyses everything', body: 'Our AI reads every clause, extracts every date, and flags every risk in under 60 seconds.' },
-    { n: '03', icon: <BellRing />, title: 'Relax and get alerts', body: 'Controva watches your contracts 24/7 and alerts you before anything important happens.' },
-  ]
   return (
-    <section id="how" className="py-24 md:py-32 bg-surface relative">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="how" className="py-24 md:py-32 bg-surface relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-fine opacity-40 mask-fade-b" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] rounded-full bg-primary/[0.07] blur-[100px]" />
+
+      <div className="relative mx-auto max-w-6xl px-6">
         <Reveal>
           <SectionEyebrow>How it works</SectionEyebrow>
           <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-center max-w-3xl mx-auto leading-tight">
             Up and running in <span className="text-gradient-indigo">under 5 minutes</span>
           </h2>
+          <p className="mt-4 text-center text-muted-foreground max-w-2xl mx-auto">
+            Watch your contracts move through the Controva pipeline — from raw PDF to instant, actionable alerts.
+          </p>
         </Reveal>
 
-        <div className="mt-16 grid md:grid-cols-3 gap-5 relative">
-          <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-          {steps.map((s, i) => (
-            <Reveal key={s.n} delay={i * 100}>
-              <div className="relative rounded-xl border border-border bg-card p-7 text-center h-full">
-                <div className="mx-auto size-14 rounded-full bg-background border border-primary/30 grid place-items-center mb-5 relative">
-                  <span className="text-primary">{s.icon}</span>
-                  <span className="absolute -top-2 -right-2 text-[10px] font-mono font-semibold text-primary bg-background border border-primary/30 rounded-full px-1.5 py-0.5">
-                    {s.n}
-                  </span>
-                </div>
-                <h3 className="text-lg font-semibold mb-2">{s.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{s.body}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+        <Reveal delay={120}>
+          <div className="mt-16">
+            <WorkflowVisualization />
+          </div>
+        </Reveal>
       </div>
     </section>
   )
@@ -371,11 +462,11 @@ function Pricing() {
             <div className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-2 p-1">
               <button
                 onClick={() => setAnnual(false)}
-                className={`px-4 py-1.5 text-xs rounded-full transition-colors ${!annual ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
+                className={`px-4 py-1.5 text-xs rounded-full transition-all duration-300 ${!annual ? 'bg-primary text-primary-foreground shadow-glow-soft' : 'text-muted-foreground'}`}
               >Monthly</button>
               <button
                 onClick={() => setAnnual(true)}
-                className={`px-4 py-1.5 text-xs rounded-full transition-colors inline-flex items-center gap-1.5 ${annual ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
+                className={`px-4 py-1.5 text-xs rounded-full transition-all duration-300 inline-flex items-center gap-1.5 ${annual ? 'bg-primary text-primary-foreground shadow-glow-soft' : 'text-muted-foreground'}`}
               >
                 Annual
                 <span className="text-[10px] bg-success/20 text-success px-1.5 py-0.5 rounded">Save 20%</span>
@@ -387,15 +478,15 @@ function Pricing() {
         <div className="mt-12 grid md:grid-cols-3 gap-5 items-stretch">
           {plans.map((p, i) => (
             <Reveal key={p.name} delay={i * 80}>
-              <div
-                className={`relative h-full rounded-2xl border p-7 flex flex-col transition-all ${
+              <SpotlightCard
+                className={`relative h-full rounded-2xl border p-7 flex flex-col transition-all duration-300 hover:-translate-y-1 ${
                   p.popular
-                    ? 'border-primary/50 bg-gradient-to-b from-primary/[0.08] to-card shadow-glow'
+                    ? 'border-primary/50 bg-gradient-to-b from-primary/[0.08] to-card shadow-glow glow-border'
                     : 'border-border bg-card hover:border-primary/30'
                 }`}
               >
                 {p.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-wider bg-primary text-primary-foreground px-3 py-1 rounded-full shadow-glow-soft">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-wider bg-primary text-primary-foreground px-3 py-1 rounded-full shadow-glow-soft z-10">
                     Most Popular
                   </span>
                 )}
@@ -424,15 +515,15 @@ function Pricing() {
                 </ul>
                 <a
                   href="/signup"
-                  className={`mt-8 inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-medium transition-all ${
+                  className={`mt-8 inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-medium transition-all shine ${
                     p.popular
                       ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow-soft'
-                      : 'border border-border bg-surface-2 hover:bg-surface-2/60'
+                      : 'border border-border bg-surface-2 hover:bg-surface-2/60 hover:border-primary/30'
                   }`}
                 >
                   {p.cta}
                 </a>
-              </div>
+              </SpotlightCard>
             </Reveal>
           ))}
         </div>
@@ -449,8 +540,9 @@ function Testimonials() {
     { quote: 'We manage 40+ client contracts. Controva gives us one clean view of everything. Game changer.', name: 'James R.', role: 'Marketing Agency, Melbourne' },
   ]
   return (
-    <section className="py-24 md:py-32 bg-surface">
-      <div className="mx-auto max-w-6xl px-6">
+    <section className="py-24 md:py-32 bg-surface relative overflow-hidden">
+      <div className="absolute -bottom-40 right-0 size-[500px] rounded-full bg-secondary/10 blur-[120px]" />
+      <div className="relative mx-auto max-w-6xl px-6">
         <Reveal>
           <SectionEyebrow>Testimonials</SectionEyebrow>
           <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-center max-w-3xl mx-auto leading-tight">
@@ -460,14 +552,14 @@ function Testimonials() {
         <div className="mt-16 grid md:grid-cols-3 gap-5">
           {reviews.map((r, i) => (
             <Reveal key={r.name} delay={i * 80}>
-              <figure className="h-full rounded-xl border border-border bg-card p-7 flex flex-col">
-                <div className="text-primary text-3xl leading-none mb-3">&ldquo;</div>
+              <SpotlightCard className="h-full rounded-xl border border-border bg-card p-7 flex flex-col hover:border-primary/30 hover:-translate-y-1 transition-all duration-300">
+                <div className="text-primary text-4xl leading-none mb-3">&ldquo;</div>
                 <blockquote className="text-sm text-foreground/90 leading-relaxed flex-1">
                   {r.quote}
                 </blockquote>
                 <figcaption className="mt-6 pt-5 border-t border-border">
                   <div className="flex items-center gap-3">
-                    <div className="size-9 rounded-full bg-gradient-to-br from-primary to-secondary grid place-items-center text-xs font-semibold text-primary-foreground">
+                    <div className="size-9 rounded-full bg-gradient-to-br from-primary to-secondary grid place-items-center text-xs font-semibold text-primary-foreground shadow-glow-soft">
                       {r.name.charAt(0)}
                     </div>
                     <div>
@@ -476,7 +568,7 @@ function Testimonials() {
                     </div>
                   </div>
                 </figcaption>
-              </figure>
+              </SpotlightCard>
             </Reveal>
           ))}
         </div>
@@ -510,18 +602,20 @@ function FAQ() {
             const isOpen = open === i
             return (
               <Reveal key={f.q} delay={i * 40}>
-                <div className="rounded-xl border border-border bg-card overflow-hidden">
+                <div className={`rounded-xl border overflow-hidden transition-all duration-300 ${
+                  isOpen ? 'border-primary/30 bg-card' : 'border-border bg-card hover:border-primary/20'
+                }`}>
                   <button
                     onClick={() => setOpen(isOpen ? null : i)}
                     className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-surface-2/40 transition-colors"
                   >
                     <span className="text-sm md:text-base font-medium">{f.q}</span>
-                    <span className="text-primary shrink-0">
+                    <span className={`text-primary shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
                       {isOpen ? <Minus size={16} /> : <Plus size={16} />}
                     </span>
                   </button>
                   <div
-                    className={`grid transition-all duration-300 ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+                    className={`grid transition-all duration-500 ease-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
                   >
                     <div className="overflow-hidden">
                       <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
@@ -544,7 +638,10 @@ function FinalCTA() {
   return (
     <section className="py-24 md:py-32 relative overflow-hidden">
       <div className="absolute inset-0 bg-radial-glow opacity-80" />
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[700px] rounded-full bg-primary/20 blur-[120px]" />
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[700px] rounded-full bg-primary/20 blur-[120px] animate-breathe" />
+      <div className="absolute inset-0 mask-radial opacity-50">
+        <div className="conic-beam" />
+      </div>
       <div className="relative mx-auto max-w-3xl px-6 text-center">
         <Reveal>
           <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-tight">
@@ -562,7 +659,7 @@ function FinalCTA() {
           <div className="mt-9 flex flex-col items-center gap-3">
             <a
               href="/signup"
-              className="group inline-flex items-center justify-center gap-2 rounded-md bg-primary px-7 py-3.5 text-base font-medium text-primary-foreground shadow-glow hover:bg-primary/90 transition-all"
+              className="group inline-flex items-center justify-center gap-2 rounded-md bg-primary px-7 py-3.5 text-base font-medium text-primary-foreground shadow-glow hover:bg-primary/90 hover:scale-[1.02] transition-all shine"
             >
               Start Free Today — No Card Required
               <ArrowRight size={18} className="transition-transform group-hover:translate-x-0.5" />
@@ -591,10 +688,10 @@ function Footer() {
               Never miss a deadline. Never miss a clause.
             </p>
             <div className="mt-5 flex items-center gap-3">
-              <a href="#" aria-label="LinkedIn" className="size-9 rounded-md border border-border bg-card hover:border-primary/40 hover:text-primary grid place-items-center transition-colors">
+              <a href="#" aria-label="LinkedIn" className="size-9 rounded-md border border-border bg-card hover:border-primary/40 hover:text-primary hover:-translate-y-0.5 grid place-items-center transition-all">
                 <Linkedin size={14} />
               </a>
-              <a href="#" aria-label="Twitter" className="size-9 rounded-md border border-border bg-card hover:border-primary/40 hover:text-primary grid place-items-center transition-colors">
+              <a href="#" aria-label="Twitter" className="size-9 rounded-md border border-border bg-card hover:border-primary/40 hover:text-primary hover:-translate-y-0.5 grid place-items-center transition-all">
                 <Twitter size={14} />
               </a>
             </div>
@@ -635,7 +732,7 @@ function SectionEyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex justify-center mb-4">
       <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2/60 backdrop-blur px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-        <span className="size-1 rounded-full bg-primary" />
+        <span className="size-1 rounded-full bg-primary animate-breathe" />
         {children}
       </span>
     </div>
