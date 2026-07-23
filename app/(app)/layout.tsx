@@ -1,6 +1,22 @@
 import Sidebar from '@/components/sidebar'
+import DevTierSwitcher from '@/components/DevTierSwitcher'
+import { createClient } from '@/lib/supabase/server'
+import { isDevAccount } from '@/lib/dev'
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let devTier: string | null = null
+  if (isDevAccount(user?.email)) {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('plan_tier')
+      .eq('id', user!.id)
+      .single()
+    devTier = profile?.plan_tier ?? 'free'
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
@@ -15,6 +31,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </main>
+      {devTier && <DevTierSwitcher currentTier={devTier} />}
     </div>
   )
 }
