@@ -74,24 +74,24 @@ function UpgradeModal({ currentPlan, contractCount, onClose }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-surface border border-[#27272a] rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+      <div className="border border-border bg-[#0e0e10] rounded-2xl p-6 max-w-md w-full mx-4 shadow-card">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-full bg-amber-400/10">
-            <Zap className="w-5 h-5 text-amber-400" />
+          <div className="p-2 rounded-lg bg-warning/15 border border-warning/20">
+            <Zap className="w-5 h-5 text-warning" />
           </div>
           <div>
-            <h2 className="text-white font-semibold text-lg">Contract limit reached</h2>
-            <p className="text-xs text-[#a1a1aa]">
+            <h2 className="text-foreground font-semibold text-lg">Contract limit reached</h2>
+            <p className="text-xs text-muted-foreground">
               You have {contractCount} contract{contractCount !== 1 ? 's' : ''} on the {PLAN_LABEL[currentPlan]} plan
             </p>
           </div>
-          <button onClick={onClose} className="ml-auto text-[#52525b] hover:text-white transition-colors">
+          <button onClick={onClose} className="ml-auto text-muted-foreground/60 hover:text-foreground transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {upgradeError && (
-          <p className="mb-3 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{upgradeError}</p>
+          <p className="mb-3 text-xs text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">{upgradeError}</p>
         )}
 
         <div className="space-y-2 mb-4">
@@ -105,24 +105,24 @@ function UpgradeModal({ currentPlan, contractCount, onClose }: {
               key={plan.tier}
               className={`flex items-center justify-between p-3.5 rounded-xl border transition-colors ${
                 plan.tier === currentPlan
-                  ? 'border-accent/30 bg-accent/5'
-                  : 'border-[#27272a] bg-[#0a0a0a]'
+                  ? 'border-primary/30 bg-primary/[0.06] shadow-glow-soft'
+                  : 'border-border bg-surface-2/40'
               }`}
             >
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-white">{plan.label}</span>
-                  {plan.tier === currentPlan && <span className="text-xs text-accent">Current</span>}
+                  <span className="text-sm font-semibold text-foreground">{plan.label}</span>
+                  {plan.tier === currentPlan && <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/15 text-primary">Current</span>}
                 </div>
-                <p className="text-xs text-[#a1a1aa]">{plan.limit}</p>
+                <p className="text-xs text-muted-foreground">{plan.limit}</p>
               </div>
               <div className="text-right flex items-center gap-3">
-                <p className="text-sm font-semibold text-white">{plan.price}</p>
+                <p className="text-sm font-semibold text-foreground">{plan.price}</p>
                 {plan.tier !== currentPlan && plan.tier !== 'free' && (
                   <button
                     onClick={() => upgrade(plan.tier)}
                     disabled={loading !== null}
-                    className="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-xs font-medium transition-colors flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-xs font-medium shadow-glow-soft transition-all flex items-center gap-1.5"
                   >
                     {loading === plan.tier && <Loader2 className="w-3 h-3 animate-spin" />}
                     Upgrade
@@ -203,9 +203,12 @@ export default function UploadPage() {
       }
     }
 
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage. Storage object keys reject many characters
+    // (unicode, #, ?, etc.) — keep the original name for display but use a
+    // sanitised key so uploads don't fail on unusual filenames.
     setState({ status: 'uploading', file })
-    const filePath = `${user.id}/${Date.now()}_${file.name}`
+    const safeName = file.name.replace(/[^\w.\- ]+/g, '_').replace(/\s+/g, '_').slice(-100)
+    const filePath = `${user.id}/${Date.now()}_${safeName}`
 
     const { error: uploadError } = await supabase.storage
       .from('contracts')
@@ -224,51 +227,59 @@ export default function UploadPage() {
       setState({ status: 'analysing', file, step })
     }, 4000)
 
-    const response = await fetch('/api/contracts/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filePath, fileName: file.name }),
-    })
+    try {
+      const response = await fetch('/api/contracts/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filePath, fileName: file.name }),
+      })
 
-    clearInterval(timer)
+      clearInterval(timer)
 
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}))
-      setState({ status: 'error', message: (body as { error?: string }).error ?? 'Analysis failed — please try again.' })
-      return
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        setState({ status: 'error', message: (body as { error?: string }).error ?? 'Analysis failed — please try again.' })
+        return
+      }
+
+      const { contractId } = await response.json() as { contractId: string }
+
+      // Note: free-tier scan window is recorded server-side in the analyze route.
+
+      router.push(`/contracts/${contractId}`)
+    } catch {
+      clearInterval(timer)
+      setState({ status: 'error', message: 'Connection lost during analysis — please check your internet and try again.' })
     }
-
-    const { contractId } = await response.json() as { contractId: string }
-
-    // Note: free-tier scan window is recorded server-side in the analyze route.
-
-    router.push(`/contracts/${contractId}`)
   }
 
   // ── Analysing screen ──────────────────────────────────────────────────────
   if (state.status === 'analysing') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6 animate-pulse">
-          <Shield className="w-8 h-8 text-accent" />
+        <div className="relative w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 shadow-glow animate-breathe">
+          <Shield className="w-8 h-8 text-primary" />
         </div>
-        <h2 className="text-xl font-semibold text-white mb-2">Analysing your contract…</h2>
-        <p className="text-[#a1a1aa] text-sm mb-8">This usually takes 15–30 seconds</p>
-        <div className="w-full max-w-xs space-y-3 text-left">
-          {ANALYSIS_STEPS.map((label, i) => (
-            <div key={i} className="flex items-center gap-3">
-              {i < state.step ? (
-                <CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
-              ) : i === state.step ? (
-                <Loader2 className="w-4 h-4 text-accent shrink-0 animate-spin" />
-              ) : (
-                <div className="w-4 h-4 rounded-full border border-[#27272a] shrink-0" />
-              )}
-              <span className={`text-sm ${i <= state.step ? 'text-white' : 'text-[#52525b]'}`}>
-                {label}
-              </span>
-            </div>
-          ))}
+        <h2 className="text-xl font-semibold text-foreground mb-2">Analysing your contract…</h2>
+        <p className="text-muted-foreground text-sm mb-8">This usually takes 15–30 seconds</p>
+        <div className="relative w-full max-w-xs rounded-xl border border-primary/20 bg-surface-2/40 p-5 overflow-hidden">
+          <div className="scan-line" />
+          <div className="space-y-3 text-left">
+            {ANALYSIS_STEPS.map((label, i) => (
+              <div key={i} className="flex items-center gap-3">
+                {i < state.step ? (
+                  <CheckCircle className="w-4 h-4 text-success shrink-0" />
+                ) : i === state.step ? (
+                  <Loader2 className="w-4 h-4 text-primary shrink-0 animate-spin" />
+                ) : (
+                  <div className="w-4 h-4 rounded-full border border-border shrink-0" />
+                )}
+                <span className={`text-sm ${i <= state.step ? 'text-foreground' : 'text-muted-foreground/60'}`}>
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -286,14 +297,15 @@ export default function UploadPage() {
       )}
 
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Upload Contract</h1>
-        <p className="text-[#a1a1aa] mt-1 text-sm">PDF or DOCX — up to 25 MB</p>
+        <p className="text-xs text-muted-foreground">New analysis</p>
+        <h1 className="text-2xl font-semibold text-foreground mt-0.5">Upload Contract</h1>
+        <p className="text-muted-foreground mt-1 text-sm">PDF or DOCX — up to 25 MB</p>
       </div>
 
       {state.status === 'error' && (
-        <div className="mb-4 flex items-start gap-3 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20">
-          <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-          <p className="text-red-400 text-sm">{state.message}</p>
+        <div className="mb-4 flex items-start gap-3 px-4 py-3 rounded-lg bg-danger/10 border border-danger/20">
+          <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
+          <p className="text-danger text-sm">{state.message}</p>
         </div>
       )}
 
@@ -302,12 +314,12 @@ export default function UploadPage() {
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => state.status !== 'uploading' && inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${
           dragOver
-            ? 'border-accent bg-accent/5'
+            ? 'border-primary bg-primary/[0.06] shadow-glow-soft'
             : state.status === 'selected'
-            ? 'border-[#3f3f46] bg-[#111111]'
-            : 'border-[#27272a] hover:border-[#3f3f46] bg-[#111111]'
+            ? 'border-primary/30 bg-surface-2/40'
+            : 'border-border hover:border-primary/30 bg-surface-2/40'
         }`}
       >
         <input
@@ -320,33 +332,33 @@ export default function UploadPage() {
 
         {state.status === 'selected' ? (
           <div className="flex flex-col items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-accent" />
+            <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-glow-soft">
+              <FileText className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <p className="text-white font-medium text-sm">{state.file.name}</p>
-              <p className="text-[#a1a1aa] text-xs mt-0.5">{(state.file.size / 1024 / 1024).toFixed(2)} MB</p>
+              <p className="text-foreground font-medium text-sm">{state.file.name}</p>
+              <p className="text-muted-foreground text-xs mt-0.5">{(state.file.size / 1024 / 1024).toFixed(2)} MB</p>
             </div>
             <button
               onClick={e => { e.stopPropagation(); setState({ status: 'idle' }) }}
-              className="flex items-center gap-1.5 text-xs text-[#a1a1aa] hover:text-white transition-colors"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="w-3.5 h-3.5" /> Remove
             </button>
           </div>
         ) : state.status === 'uploading' ? (
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 text-accent animate-spin" />
-            <p className="text-white text-sm font-medium">Uploading…</p>
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <p className="text-foreground text-sm font-medium">Uploading…</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[#1a1a1a] flex items-center justify-center">
-              <Upload className="w-6 h-6 text-[#a1a1aa]" />
+            <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <Upload className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <p className="text-white text-sm font-medium">Drop your contract here</p>
-              <p className="text-[#a1a1aa] text-xs mt-1">or click to browse — PDF or DOCX, max 25 MB</p>
+              <p className="text-foreground text-sm font-medium">Drop your contract here</p>
+              <p className="text-muted-foreground text-xs mt-1">or click to browse — PDF or DOCX, max 25 MB</p>
             </div>
           </div>
         )}
@@ -355,7 +367,7 @@ export default function UploadPage() {
       {state.status === 'selected' && (
         <button
           onClick={handleAnalyse}
-          className="mt-4 w-full bg-accent hover:bg-accent-hover text-white font-medium py-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+          className="mt-4 w-full rounded-lg bg-primary py-3 text-sm font-medium text-primary-foreground shadow-glow hover:bg-primary/90 hover:scale-[1.01] transition-all shine flex items-center justify-center gap-2"
         >
           <Shield className="w-4 h-4" />
           Analyse Contract

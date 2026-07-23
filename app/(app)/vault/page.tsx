@@ -40,26 +40,31 @@ const STATUS_LABEL: Record<string, string> = {
   expired: 'Expired', needs_review: 'Needs Review',
 }
 const STATUS_BADGE: Record<string, string> = {
-  active: 'bg-green-400/10 text-green-400 border-green-400/20',
-  expiring_soon: 'bg-amber-400/10 text-amber-400 border-amber-400/20',
-  expired: 'bg-red-400/10 text-red-400 border-red-400/20',
-  needs_review: 'bg-purple-400/10 text-purple-400 border-purple-400/20',
+  active: 'bg-success/15 text-success border-success/20',
+  expiring_soon: 'bg-warning/15 text-warning border-warning/20',
+  expired: 'bg-danger/15 text-danger border-danger/20',
+  needs_review: 'bg-secondary/15 text-secondary border-secondary/20',
 }
 
 function healthGrade(score: number | null): { grade: string; color: string } {
-  if (score === null) return { grade: '—', color: 'text-[#52525b]' }
-  if (score >= 80) return { grade: 'A', color: 'text-green-400' }
-  if (score >= 60) return { grade: 'B', color: 'text-lime-400' }
-  if (score >= 40) return { grade: 'C', color: 'text-amber-400' }
-  if (score >= 20) return { grade: 'D', color: 'text-orange-400' }
-  return { grade: 'F', color: 'text-red-400' }
+  if (score === null) return { grade: '—', color: 'text-muted-foreground/60' }
+  if (score >= 80) return { grade: 'A', color: 'text-success' }
+  if (score >= 60) return { grade: 'B', color: 'text-success/70' }
+  if (score >= 40) return { grade: 'C', color: 'text-warning' }
+  if (score >= 20) return { grade: 'D', color: 'text-warning/70' }
+  return { grade: 'F', color: 'text-danger' }
 }
 
 function formatValue(value: number | null, currency: string | null): string {
   if (value === null) return 'Value not specified'
-  return new Intl.NumberFormat('en-GB', {
-    style: 'currency', currency: currency ?? 'GBP', maximumFractionDigits: 0,
-  }).format(value)
+  try {
+    return new Intl.NumberFormat('en-AU', {
+      style: 'currency', currency: currency ?? 'AUD', maximumFractionDigits: 0,
+    }).format(value)
+  } catch {
+    // Unknown currency code from extraction — show the raw amount
+    return `${currency ?? ''} ${value.toLocaleString('en-AU')}`.trim()
+  }
 }
 
 function getNextEvent(events: ContractRow['contract_events']) {
@@ -101,39 +106,44 @@ function GridCard({ c }: { c: ContractRow }) {
   return (
     <Link
       href={`/contracts/${c.id}`}
-      className="bg-surface border border-[#27272a] hover:border-[#3f3f46] rounded-xl p-5 flex flex-col gap-3 transition-colors group"
+      className="rounded-xl border border-border bg-surface-2/40 hover:border-primary/30 hover:shadow-glow-soft hover:-translate-y-0.5 p-5 flex flex-col gap-3 transition-all duration-300 group"
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-white truncate">{c.contract_name}</p>
-          <p className="text-xs text-[#a1a1aa] mt-0.5 truncate">
-            {c.counterparty_name ?? 'Unknown counterparty'}
-          </p>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="size-8 rounded-md bg-primary/10 border border-primary/20 grid place-items-center shrink-0">
+            <FileText className="w-3.5 h-3.5 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground truncate">{c.contract_name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+              {c.counterparty_name ?? 'Unknown counterparty'}
+            </p>
+          </div>
         </div>
         <span className={`text-lg font-bold shrink-0 ${grade.color}`}>{grade.grade}</span>
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-[#a1a1aa]">{c.contract_type ?? 'Unknown type'}</span>
-        <span className={`px-2 py-0.5 rounded text-xs font-medium border ${STATUS_BADGE[c.status] ?? 'bg-[#1a1a1a] text-[#a1a1aa] border-[#27272a]'}`}>
+        <span className="text-xs text-muted-foreground">{c.contract_type ?? 'Unknown type'}</span>
+        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${STATUS_BADGE[c.status] ?? 'bg-surface-2 text-muted-foreground border-border'}`}>
           {STATUS_LABEL[c.status] ?? c.status}
         </span>
       </div>
 
-      <div className="pt-3 border-t border-[#1a1a1a] flex items-center justify-between">
-        <span className="text-xs text-[#a1a1aa]">
+      <div className="pt-3 border-t border-border/60 flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">
           {formatValue(c.contract_value, c.value_currency)}
         </span>
         {next ? (
           <span className={`text-xs font-medium tabular-nums ${
-            daysUntil(next.event_date) < 14 ? 'text-red-400'
-            : daysUntil(next.event_date) < 30 ? 'text-amber-400'
-            : 'text-[#a1a1aa]'
+            daysUntil(next.event_date) < 14 ? 'text-danger'
+            : daysUntil(next.event_date) < 30 ? 'text-warning'
+            : 'text-muted-foreground'
           }`}>
             {daysUntil(next.event_date)}d
           </span>
         ) : (
-          <span className="text-xs text-[#52525b]">No upcoming dates</span>
+          <span className="text-xs text-muted-foreground/60">No upcoming dates</span>
         )}
       </div>
     </Link>
@@ -146,29 +156,29 @@ function ListRow({ c }: { c: ContractRow }) {
   return (
     <Link
       href={`/contracts/${c.id}`}
-      className="flex items-center gap-4 px-4 py-3 border-b border-[#1a1a1a] last:border-0 hover:bg-white/5 transition-colors group"
+      className="flex items-center gap-4 px-4 py-3 border-b border-border/60 last:border-0 hover:bg-white/[0.02] transition-colors group"
     >
-      <div className="w-7 h-7 rounded-lg bg-[#1a1a1a] flex items-center justify-center shrink-0">
-        <FileText className="w-3.5 h-3.5 text-[#a1a1aa]" />
+      <div className="size-8 rounded-md bg-primary/10 border border-primary/20 grid place-items-center shrink-0">
+        <FileText className="w-3.5 h-3.5 text-primary" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-white truncate">{c.contract_name}</p>
-        <p className="text-xs text-[#a1a1aa] truncate">{c.counterparty_name ?? 'Unknown'}</p>
+        <p className="text-sm font-medium text-foreground truncate">{c.contract_name}</p>
+        <p className="text-xs text-muted-foreground truncate">{c.counterparty_name ?? 'Unknown'}</p>
       </div>
-      <span className="text-xs text-[#a1a1aa] w-28 truncate shrink-0 hidden md:block">
+      <span className="text-xs text-muted-foreground w-28 truncate shrink-0 hidden md:block">
         {c.contract_type ?? '—'}
       </span>
       <span className={`text-sm font-bold w-8 text-center shrink-0 ${grade.color}`}>{grade.grade}</span>
-      <span className="text-xs text-[#a1a1aa] w-32 truncate shrink-0 hidden lg:block">
+      <span className="text-xs text-muted-foreground w-32 truncate shrink-0 hidden lg:block">
         {formatValue(c.contract_value, c.value_currency)}
       </span>
-      <span className={`px-2 py-0.5 rounded text-xs font-medium border shrink-0 w-28 text-center hidden sm:block ${STATUS_BADGE[c.status] ?? 'bg-[#1a1a1a] text-[#a1a1aa] border-[#27272a]'}`}>
+      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium border shrink-0 w-28 text-center hidden sm:block ${STATUS_BADGE[c.status] ?? 'bg-surface-2 text-muted-foreground border-border'}`}>
         {STATUS_LABEL[c.status] ?? c.status}
       </span>
       <span className={`text-xs font-medium w-12 text-right shrink-0 tabular-nums ${
-        next && daysUntil(next.event_date) < 14 ? 'text-red-400'
-        : next && daysUntil(next.event_date) < 30 ? 'text-amber-400'
-        : 'text-[#52525b]'
+        next && daysUntil(next.event_date) < 14 ? 'text-danger'
+        : next && daysUntil(next.event_date) < 30 ? 'text-warning'
+        : 'text-muted-foreground/60'
       }`}>
         {next ? `${daysUntil(next.event_date)}d` : '—'}
       </span>
@@ -187,8 +197,8 @@ function SortButton({ label, k, current, dir, onSort }: {
   return (
     <button
       onClick={() => onSort(k)}
-      className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${
-        active ? 'bg-accent/10 text-accent' : 'text-[#a1a1aa] hover:text-white hover:bg-white/5'
+      className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md border transition-all ${
+        active ? 'bg-primary/15 text-primary border-primary/30' : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-white/[0.03]'
       }`}
     >
       {label}
@@ -218,16 +228,28 @@ function VaultContent() {
   const [planTier, setPlanTier] = useState<string | null>(null)
   const [upgrading, setUpgrading] = useState(false)
 
+  const [upgradeError, setUpgradeError] = useState<string | null>(null)
+
   async function handleUpgrade() {
     setUpgrading(true)
-    const res = await fetch('/api/stripe/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: 'starter' }),
-    })
-    const { url } = await res.json()
-    if (url) window.location.href = url
-    else setUpgrading(false)
+    setUpgradeError(null)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: 'starter' }),
+      })
+      const body = await res.json()
+      if (body.url) {
+        window.location.href = body.url
+      } else {
+        setUpgradeError(body.error ?? 'Something went wrong — please try again.')
+        setUpgrading(false)
+      }
+    } catch {
+      setUpgradeError('Network error — please try again.')
+      setUpgrading(false)
+    }
   }
   const [view, setView] = useState<ViewMode>('grid')
   const [search, setSearch] = useState('')
@@ -254,7 +276,11 @@ function VaultContent() {
         supabase
           .from('contracts')
           .select('id, contract_name, counterparty_name, contract_type, status, risk_level, health_score, contract_value, value_currency, end_date, created_at, ai_summary, contract_events(id, event_date, event_label)')
-          .order('created_at', { ascending: false }),
+          .order('created_at', { ascending: false })
+          // Safety cap — plan limits keep counts far below this except on
+          // Agency (unlimited); revisit with server-side pagination if agency
+          // portfolios approach this size.
+          .limit(500),
       ])
       setPlanTier(profile?.plan_tier ?? 'free')
       if (error) {
@@ -303,10 +329,10 @@ function VaultContent() {
   if (loading) {
     return (
       <div className="space-y-8">
-        <div className="h-8 w-48 bg-[#1a1a1a] rounded-lg animate-pulse" />
+        <div className="h-8 w-48 bg-surface-2/60 rounded-lg animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-40 bg-[#1a1a1a] rounded-xl animate-pulse" />
+            <div key={i} className="h-40 border border-border bg-surface-2/40 rounded-xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -317,8 +343,8 @@ function VaultContent() {
   if (fetchError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <p className="text-red-400 text-sm mb-2">Failed to load contracts</p>
-        <p className="text-[#52525b] text-xs">Check your connection and refresh the page</p>
+        <p className="text-danger text-sm mb-2">Failed to load contracts</p>
+        <p className="text-muted-foreground/60 text-xs">Check your connection and refresh the page</p>
       </div>
     )
   }
@@ -327,22 +353,25 @@ function VaultContent() {
   if (planTier === 'free') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6">
-          <Lock className="w-8 h-8 text-accent" />
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 shadow-glow-soft">
+          <Lock className="w-8 h-8 text-primary" />
         </div>
-        <h1 className="text-xl font-semibold text-white mb-2">Vault is a paid feature</h1>
-        <p className="text-[#a1a1aa] text-sm max-w-xs mb-8">
+        <h1 className="text-xl font-semibold text-foreground mb-2">Vault is a paid feature</h1>
+        <p className="text-muted-foreground text-sm max-w-xs mb-8">
           Upgrade to Starter to browse, search, and manage all your contracts in one place.
         </p>
+        {upgradeError && (
+          <p className="mb-4 text-xs text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">{upgradeError}</p>
+        )}
         <button
           onClick={handleUpgrade}
           disabled={upgrading}
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow hover:bg-primary/90 hover:scale-[1.02] disabled:opacity-50 transition-all shine"
         >
           {upgrading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
           {upgrading ? 'Redirecting…' : 'Upgrade to Starter — A$29/mo'}
         </button>
-        <p className="text-xs text-[#52525b] mt-3">14-day free trial · Cancel anytime</p>
+        <p className="text-xs text-muted-foreground/60 mt-3">14-day free trial · Cancel anytime</p>
       </div>
     )
   }
@@ -351,16 +380,16 @@ function VaultContent() {
   if (contracts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6">
-          <FileText className="w-8 h-8 text-accent" />
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 shadow-glow-soft">
+          <FileText className="w-8 h-8 text-primary" />
         </div>
-        <h1 className="text-xl font-semibold text-white mb-2">Your vault is empty</h1>
-        <p className="text-[#a1a1aa] text-sm max-w-xs mb-8">
+        <h1 className="text-xl font-semibold text-foreground mb-2">Your vault is empty</h1>
+        <p className="text-muted-foreground text-sm max-w-xs mb-8">
           Upload your first contract to see it here, analysed and organised.
         </p>
         <Link
           href="/upload"
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow hover:bg-primary/90 hover:scale-[1.02] transition-all shine"
         >
           <Upload className="w-4 h-4" />
           Upload a contract
@@ -375,12 +404,14 @@ function VaultContent() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Vault</h1>
-          <p className="text-[#a1a1aa] mt-1 text-sm">{filtered.length} of {contracts.length} contracts</p>
+          <p className="text-xs text-muted-foreground">Vault</p>
+          <h1 className="text-2xl font-semibold text-foreground mt-0.5">
+            All contracts <span className="text-muted-foreground font-normal">· {filtered.length}</span>
+          </h1>
         </div>
         <Link
           href="/upload"
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-medium px-4 py-2 rounded-lg text-sm transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-glow-soft hover:bg-primary/90 hover:shadow-glow transition-all shine"
         >
           <Upload className="w-4 h-4" />
           Upload
@@ -390,30 +421,30 @@ function VaultContent() {
       {/* Search + view toggle */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#52525b]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search contracts, counterparties, summaries…"
-            className="w-full bg-surface border border-[#27272a] rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+            className="w-full bg-surface-2/50 border border-border rounded-lg pl-9 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors"
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-              <X className="w-4 h-4 text-[#52525b] hover:text-white transition-colors" />
+              <X className="w-4 h-4 text-muted-foreground/60 hover:text-foreground transition-colors" />
             </button>
           )}
         </div>
-        <div className="flex items-center border border-[#27272a] rounded-lg overflow-hidden">
+        <div className="flex items-center border border-border rounded-lg overflow-hidden bg-surface-2/50">
           <button
             onClick={() => setView('grid')}
-            className={`p-2.5 transition-colors ${view === 'grid' ? 'bg-accent/10 text-accent' : 'text-[#a1a1aa] hover:text-white hover:bg-white/5'}`}
+            className={`p-2.5 transition-colors ${view === 'grid' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.03]'}`}
           >
             <LayoutGrid className="w-4 h-4" />
           </button>
           <button
             onClick={() => setView('list')}
-            className={`p-2.5 transition-colors ${view === 'list' ? 'bg-accent/10 text-accent' : 'text-[#a1a1aa] hover:text-white hover:bg-white/5'}`}
+            className={`p-2.5 transition-colors ${view === 'list' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.03]'}`}
           >
             <List className="w-4 h-4" />
           </button>
@@ -421,35 +452,35 @@ function VaultContent() {
       </div>
 
       {/* Filter bar */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-[#52525b] font-medium">Filter:</span>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="text-[10px] text-muted-foreground inline-flex items-center gap-1 mr-1">Filter</span>
 
         {(['active', 'expiring_soon', 'expired', 'needs_review'] as const).map(s => (
           <button
             key={s}
             onClick={() => toggleFilter(filterStatus, setFilterStatus, s)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+            className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
               filterStatus.includes(s)
                 ? STATUS_BADGE[s]
-                : 'border-[#27272a] text-[#a1a1aa] hover:border-[#3f3f46] hover:text-white'
+                : 'border-border text-muted-foreground hover:text-foreground'
             }`}
           >
             {STATUS_LABEL[s]}
           </button>
         ))}
 
-        <span className="w-px h-4 bg-[#27272a]" />
+        <span className="w-px h-4 bg-border" />
 
         {(['low', 'medium', 'high'] as const).map(r => (
           <button
             key={r}
             onClick={() => toggleFilter(filterRisk, setFilterRisk, r)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors capitalize ${
+            className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all capitalize ${
               filterRisk.includes(r)
-                ? r === 'high' ? 'bg-red-400/10 text-red-400 border-red-400/20'
-                  : r === 'medium' ? 'bg-amber-400/10 text-amber-400 border-amber-400/20'
-                  : 'bg-green-400/10 text-green-400 border-green-400/20'
-                : 'border-[#27272a] text-[#a1a1aa] hover:border-[#3f3f46] hover:text-white'
+                ? r === 'high' ? 'bg-danger/15 text-danger border-danger/30'
+                  : r === 'medium' ? 'bg-warning/15 text-warning border-warning/30'
+                  : 'bg-success/15 text-success border-success/30'
+                : 'border-border text-muted-foreground hover:text-foreground'
             }`}
           >
             {r} risk
@@ -458,15 +489,15 @@ function VaultContent() {
 
         {contractTypes.length > 0 && (
           <>
-            <span className="w-px h-4 bg-[#27272a]" />
+            <span className="w-px h-4 bg-border" />
             {contractTypes.map(t => (
               <button
                 key={t}
                 onClick={() => toggleFilter(filterType, setFilterType, t)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
                   filterType.includes(t)
-                    ? 'bg-accent/10 text-accent border-accent/20'
-                    : 'border-[#27272a] text-[#a1a1aa] hover:border-[#3f3f46] hover:text-white'
+                    ? 'bg-primary/15 text-primary border-primary/30'
+                    : 'border-border text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {t}
@@ -478,7 +509,7 @@ function VaultContent() {
         {hasFilters && (
           <button
             onClick={() => { setFilterStatus([]); setFilterRisk([]); setFilterType([]); setSearch('') }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs text-[#a1a1aa] hover:text-white border border-[#27272a] hover:border-[#3f3f46] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs text-muted-foreground hover:text-foreground border border-border transition-colors"
           >
             <X className="w-3 h-3" /> Clear
           </button>
@@ -487,7 +518,7 @@ function VaultContent() {
 
       {/* Sort bar */}
       <div className="flex items-center gap-1 flex-wrap">
-        <span className="text-xs text-[#52525b] font-medium mr-1">Sort:</span>
+        <span className="text-[10px] text-muted-foreground mr-1">Sort</span>
         {([
           ['End Date', 'end_date'],
           ['Risk', 'risk_level'],
@@ -503,10 +534,10 @@ function VaultContent() {
       {/* No results */}
       {filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <p className="text-[#a1a1aa] text-sm">No contracts match your search or filters.</p>
+          <p className="text-muted-foreground text-sm">No contracts match your search or filters.</p>
           <button
             onClick={() => { setFilterStatus([]); setFilterRisk([]); setFilterType([]); setSearch('') }}
-            className="mt-3 text-xs text-accent hover:text-accent-hover transition-colors"
+            className="mt-3 text-xs text-primary hover:text-secondary transition-colors"
           >
             Clear filters
           </button>
@@ -522,9 +553,9 @@ function VaultContent() {
 
       {/* List view */}
       {view === 'list' && filtered.length > 0 && (
-        <div className="bg-surface border border-[#27272a] rounded-xl overflow-hidden">
-          <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[#1a1a1a] text-xs text-[#52525b] font-medium">
-            <div className="w-7 shrink-0" />
+        <div className="rounded-xl border border-border bg-surface-2/40 overflow-hidden">
+          <div className="flex items-center gap-4 px-4 py-2.5 border-b border-border text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+            <div className="w-8 shrink-0" />
             <span className="flex-1">Contract</span>
             <span className="w-28 shrink-0 hidden md:block">Type</span>
             <span className="w-8 text-center shrink-0">Grade</span>

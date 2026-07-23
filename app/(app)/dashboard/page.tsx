@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
-  AlertTriangle, Clock, FileText, Upload,
+  Clock, FileText, Upload,
   TrendingUp, Shield, Activity, ChevronRight,
-  Calendar, User, Zap,
+  User, Zap, ShieldAlert, Calendar,
 } from 'lucide-react'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -13,19 +14,20 @@ function daysFromToday(dateStr: string) {
 }
 
 function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function greeting() {
+  const hour = Number(new Date().toLocaleString('en-AU', { timeZone: 'Australia/Brisbane', hour: 'numeric', hour12: false }))
+  if (hour < 12) return 'Good morning'
+  if (hour < 18) return 'Good afternoon'
+  return 'Good evening'
 }
 
 function healthColor(score: number) {
-  if (score >= 80) return 'text-green-400'
-  if (score >= 50) return 'text-amber-400'
-  return 'text-red-400'
-}
-
-function healthRingColor(score: number) {
-  if (score >= 80) return '#4ade80'
-  if (score >= 50) return '#fbbf24'
-  return '#f87171'
+  if (score >= 80) return 'text-success'
+  if (score >= 50) return 'text-warning'
+  return 'text-danger'
 }
 
 function healthLabel(score: number) {
@@ -35,22 +37,22 @@ function healthLabel(score: number) {
 }
 
 function markerColor(days: number) {
-  if (days < 14) return 'bg-red-400'
-  if (days < 30) return 'bg-amber-400'
-  return 'bg-green-400'
+  if (days < 14) return 'bg-danger'
+  if (days < 30) return 'bg-warning'
+  return 'bg-success'
 }
 
 function markerBorder(days: number) {
-  if (days < 14) return 'border-red-400/50'
-  if (days < 30) return 'border-amber-400/50'
-  return 'border-green-400/50'
+  if (days < 14) return 'border-danger/50'
+  if (days < 30) return 'border-warning/50'
+  return 'border-success/50'
 }
 
 const STATUS_BADGE: Record<string, string> = {
-  active: 'bg-green-400/10 text-green-400',
-  expiring_soon: 'bg-amber-400/10 text-amber-400',
-  expired: 'bg-red-400/10 text-red-400',
-  needs_review: 'bg-purple-400/10 text-purple-400',
+  active: 'bg-success/15 text-success',
+  expiring_soon: 'bg-warning/15 text-warning',
+  expired: 'bg-danger/15 text-danger',
+  needs_review: 'bg-secondary/15 text-secondary',
 }
 const STATUS_LABEL: Record<string, string> = {
   active: 'Active',
@@ -64,6 +66,7 @@ const STATUS_LABEL: Record<string, string> = {
 export default async function DashboardPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const today = new Date().toISOString().split('T')[0]
   const in30Days = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]
@@ -92,7 +95,7 @@ export default async function DashboardPage() {
     supabase
       .from('users')
       .select('onboarding_complete, full_name, industry, plan_tier')
-      .eq('id', user!.id)
+      .eq('id', user.id)
       .single(),
   ])
 
@@ -104,16 +107,16 @@ export default async function DashboardPage() {
   if (allContracts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6">
-          <Shield className="w-8 h-8 text-accent" />
+        <div className="relative w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 shadow-glow-soft">
+          <Shield className="w-8 h-8 text-primary" />
         </div>
-        <h1 className="text-2xl font-semibold text-white mb-2">Welcome to Controva</h1>
-        <p className="text-[#a1a1aa] text-sm max-w-sm mb-8">
+        <h1 className="text-2xl font-semibold text-foreground mb-2">Welcome to Controva</h1>
+        <p className="text-muted-foreground text-sm max-w-sm mb-8">
           Upload your first contract and let AI analyse it for risks, key dates, and obligations — in under 30 seconds.
         </p>
         <Link
           href="/upload"
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow hover:bg-primary/90 hover:scale-[1.02] transition-all shine"
         >
           <Upload className="w-4 h-4" />
           Upload your first contract
@@ -143,25 +146,29 @@ export default async function DashboardPage() {
 
   const upcomingDeadlines = events.slice(0, 5)
 
+  const gaugeR = 32
+  const gaugeC = 2 * Math.PI * gaugeR
+
   // ── render ─────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-8">
 
       {/* Free tier upgrade banner */}
       {profile?.plan_tier === 'free' && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-amber-400/10 border border-amber-400/20 rounded-xl">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-400/20 flex items-center justify-center shrink-0">
-              <Zap className="w-4 h-4 text-amber-400" />
+        <div className="relative overflow-hidden flex items-center justify-between gap-4 px-4 py-3 bg-warning/[0.06] border border-warning/20 rounded-xl">
+          <span className="absolute -top-8 -right-8 size-24 rounded-full bg-warning/10 blur-2xl animate-breathe" />
+          <div className="relative flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-warning/15 border border-warning/20 flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4 text-warning" />
             </div>
             <div>
-              <p className="text-white text-sm font-medium">You&apos;re on the Free plan</p>
-              <p className="text-[#a1a1aa] text-xs">Upgrade to unlock Vault, full alerts, and up to 15 contracts</p>
+              <p className="text-foreground text-sm font-medium">You&apos;re on the Free plan</p>
+              <p className="text-muted-foreground text-xs">Upgrade to unlock Vault, full alerts, and up to 15 contracts</p>
             </div>
           </div>
           <Link
             href="/settings#billing"
-            className="shrink-0 text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors flex items-center gap-1 whitespace-nowrap"
+            className="relative shrink-0 text-xs text-warning hover:text-warning/80 font-semibold transition-colors flex items-center gap-1 whitespace-nowrap"
           >
             Upgrade now <ChevronRight className="w-3.5 h-3.5" />
           </Link>
@@ -170,19 +177,19 @@ export default async function DashboardPage() {
 
       {/* Complete profile banner */}
       {profile && !profile.onboarding_complete && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-accent/10 border border-accent/20 rounded-xl">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-primary/[0.06] border border-primary/20 rounded-xl">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
-              <User className="w-4 h-4 text-accent" />
+            <div className="w-8 h-8 rounded-lg bg-primary/15 border border-primary/20 flex items-center justify-center shrink-0">
+              <User className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="text-white text-sm font-medium">Complete your profile</p>
-              <p className="text-[#a1a1aa] text-xs">Personalise AI analysis for your industry and business type</p>
+              <p className="text-foreground text-sm font-medium">Complete your profile</p>
+              <p className="text-muted-foreground text-xs">Personalise AI analysis for your industry and business type</p>
             </div>
           </div>
           <Link
             href="/onboarding"
-            className="shrink-0 text-xs text-accent hover:text-accent-hover font-semibold transition-colors flex items-center gap-1"
+            className="shrink-0 text-xs text-primary hover:text-secondary font-semibold transition-colors flex items-center gap-1"
           >
             Complete setup <ChevronRight className="w-3.5 h-3.5" />
           </Link>
@@ -191,10 +198,11 @@ export default async function DashboardPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-white">
-          {profile?.full_name ? `Welcome back, ${profile.full_name.split(' ')[0]}` : 'Dashboard'}
+        <p className="text-xs text-muted-foreground">Portfolio overview</p>
+        <h1 className="text-2xl font-semibold text-foreground mt-0.5">
+          {profile?.full_name ? `${greeting()}, ${profile.full_name.split(' ')[0]}` : 'Dashboard'}
         </h1>
-        <p className="text-[#a1a1aa] mt-1 text-sm">
+        <p className="text-muted-foreground mt-1 text-sm">
           {profile?.industry
             ? `${allContracts.length} contract${allContracts.length !== 1 ? 's' : ''} · ${profile.industry}`
             : `${allContracts.length} contract${allContracts.length !== 1 ? 's' : ''} in your portfolio`}
@@ -204,125 +212,133 @@ export default async function DashboardPage() {
       {/* Top row: health score + alert cards */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
 
-        {/* Portfolio health score */}
-        <div className="lg:col-span-1 bg-surface border border-[#27272a] rounded-xl p-6 flex flex-col items-center justify-center text-center">
+        {/* Portfolio health score — gradient radial gauge, same as the site mockup */}
+        <div className="lg:col-span-1 rounded-xl border border-border bg-surface-2/40 p-6 flex flex-col items-center justify-center text-center">
           {portfolioScore !== null ? (
             <>
-              <div className="relative w-24 h-24 mb-3">
-                <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
-                  <circle cx="48" cy="48" r="40" fill="none" stroke="#27272a" strokeWidth="8" />
+              <div className="relative size-24 mb-3">
+                <svg viewBox="0 0 80 80" className="size-24 -rotate-90">
+                  <circle cx="40" cy="40" r={gaugeR} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
                   <circle
-                    cx="48" cy="48" r="40" fill="none"
-                    stroke={healthRingColor(portfolioScore)}
-                    strokeWidth="8"
+                    cx="40" cy="40" r={gaugeR}
+                    fill="none"
+                    stroke="url(#gaugeGrad)"
+                    strokeWidth="6"
                     strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 40}`}
-                    strokeDashoffset={`${2 * Math.PI * 40 * (1 - portfolioScore / 100)}`}
-                    className="transition-all duration-700"
+                    strokeDasharray={gaugeC}
+                    strokeDashoffset={gaugeC - (portfolioScore / 100) * gaugeC}
+                    style={{ filter: 'drop-shadow(0 0 4px rgba(99,102,241,0.6))' }}
                   />
+                  <defs>
+                    <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#22c55e" />
+                      <stop offset="100%" stopColor="#6366f1" />
+                    </linearGradient>
+                  </defs>
                 </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`text-2xl font-bold ${healthColor(portfolioScore)}`}>
-                    {portfolioScore}
-                  </span>
+                <div className="absolute inset-0 grid place-items-center">
+                  <span className="text-2xl font-semibold tracking-tight text-foreground">{portfolioScore}</span>
                 </div>
               </div>
-              <p className="text-white text-sm font-medium">Portfolio Health</p>
-              <p className={`text-xs mt-0.5 ${healthColor(portfolioScore)}`}>
-                {healthLabel(portfolioScore)}
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Portfolio health score</p>
+              <p className={`text-xs mt-1 inline-flex items-center gap-1 ${healthColor(portfolioScore)}`}>
+                <TrendingUp className="w-3 h-3" /> {healthLabel(portfolioScore)}
               </p>
             </>
           ) : (
             <>
-              <Activity className="w-8 h-8 text-[#a1a1aa] mb-3" />
-              <p className="text-white text-sm font-medium">Portfolio Health</p>
-              <p className="text-xs text-[#a1a1aa] mt-0.5">Analysing contracts…</p>
+              <Activity className="w-8 h-8 text-muted-foreground mb-3" />
+              <p className="text-foreground text-sm font-medium">Portfolio Health</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Analysing contracts…</p>
             </>
           )}
         </div>
 
-        {/* Alert cards */}
+        {/* Alert stat cards */}
         <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
             href="/vault?filter=expiring_soon"
-            className="bg-surface border border-[#27272a] hover:border-amber-400/30 rounded-xl p-5 transition-colors group"
+            className="relative overflow-hidden rounded-xl border border-border bg-surface-2/40 hover:border-warning/30 hover:-translate-y-0.5 p-5 transition-all group"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-lg bg-amber-400/10 flex items-center justify-center">
-                <Clock className="w-4 h-4 text-amber-400" />
-              </div>
-              <ChevronRight className="w-4 h-4 text-[#52525b] group-hover:text-[#a1a1aa] transition-colors" />
+            {expiringIn30 > 0 && (
+              <span className="absolute -top-6 -right-6 size-16 rounded-full bg-warning/10 blur-2xl animate-breathe" />
+            )}
+            <div className="relative flex items-center justify-between mb-3">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Expiring soon</span>
+              <Clock className="w-4 h-4 text-warning" />
             </div>
-            <p className="text-2xl font-bold text-white">{expiringIn30}</p>
-            <p className="text-xs text-[#a1a1aa] mt-1">
-              contract{expiringIn30 !== 1 ? 's' : ''} expiring in 30 days
+            <p className="relative text-2xl font-semibold tracking-tight text-foreground">{expiringIn30}</p>
+            <p className="relative text-xs text-muted-foreground mt-1 flex items-center justify-between">
+              contract{expiringIn30 !== 1 ? 's' : ''} in 30 days
+              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all" />
             </p>
           </Link>
 
           <Link
             href="/vault?filter=high_risk"
-            className="bg-surface border border-[#27272a] hover:border-red-400/30 rounded-xl p-5 transition-colors group"
+            className="relative overflow-hidden rounded-xl border border-border bg-surface-2/40 hover:border-danger/30 hover:-translate-y-0.5 p-5 transition-all group"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-lg bg-red-400/10 flex items-center justify-center">
-                <AlertTriangle className="w-4 h-4 text-red-400" />
-              </div>
-              <ChevronRight className="w-4 h-4 text-[#52525b] group-hover:text-[#a1a1aa] transition-colors" />
+            {highRiskCount > 0 && (
+              <span className="absolute -top-6 -right-6 size-16 rounded-full bg-danger/10 blur-2xl animate-breathe" />
+            )}
+            <div className="relative flex items-center justify-between mb-3">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">High risk</span>
+              <ShieldAlert className="w-4 h-4 text-danger" />
             </div>
-            <p className="text-2xl font-bold text-white">{highRiskCount}</p>
-            <p className="text-xs text-[#a1a1aa] mt-1">
-              high-risk clause{highRiskCount !== 1 ? 's' : ''} detected
+            <p className="relative text-2xl font-semibold tracking-tight text-foreground">{highRiskCount}</p>
+            <p className="relative text-xs text-muted-foreground mt-1 flex items-center justify-between">
+              clause{highRiskCount !== 1 ? 's' : ''} detected
+              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all" />
             </p>
           </Link>
 
           <Link
             href="/vault?filter=needs_review"
-            className="bg-surface border border-[#27272a] hover:border-purple-400/30 rounded-xl p-5 transition-colors group"
+            className="rounded-xl border border-border bg-surface-2/40 hover:border-primary/30 hover:-translate-y-0.5 p-5 transition-all group"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-lg bg-purple-400/10 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-purple-400" />
-              </div>
-              <ChevronRight className="w-4 h-4 text-[#52525b] group-hover:text-[#a1a1aa] transition-colors" />
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Needs review</span>
+              <FileText className="w-4 h-4 text-primary" />
             </div>
-            <p className="text-2xl font-bold text-white">{needsReviewCount}</p>
-            <p className="text-xs text-[#a1a1aa] mt-1">
+            <p className="text-2xl font-semibold tracking-tight text-foreground">{needsReviewCount}</p>
+            <p className="text-xs text-muted-foreground mt-1 flex items-center justify-between">
               contract{needsReviewCount !== 1 ? 's' : ''} requiring action
+              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all" />
             </p>
           </Link>
         </div>
       </div>
 
       {/* Deadline timeline strip */}
-      <div className="bg-surface border border-[#27272a] rounded-xl p-5">
+      <div className="rounded-xl border border-border bg-surface-2/40 p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[#a1a1aa]" />
-            Next 90 Days
-          </h2>
-          <div className="flex items-center gap-4 text-xs text-[#a1a1aa]">
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Under 14 days</span>
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" /> 14–30 days</span>
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-400 inline-block" /> 30–90 days</span>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5" />
+            Next 90 days
+          </p>
+          <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-danger inline-block" /> Under 14 days</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-warning inline-block" /> 14–30 days</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-success inline-block" /> 30–90 days</span>
           </div>
         </div>
 
         {events.length === 0 ? (
-          <div className="h-14 flex items-center justify-center border border-dashed border-[#27272a] rounded-lg">
-            <p className="text-xs text-[#52525b]">No upcoming events in the next 90 days</p>
+          <div className="h-14 flex items-center justify-center border border-dashed border-border rounded-lg">
+            <p className="text-xs text-muted-foreground/60">No upcoming events in the next 90 days</p>
           </div>
         ) : (
           <div className="relative h-14">
             {/* Track */}
-            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-0.5 bg-[#27272a] rounded-full" />
+            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-px bg-gradient-to-r from-primary/40 via-border to-border rounded-full" />
             {/* 30-day mark */}
             <div className="absolute top-0 bottom-0 flex flex-col items-center" style={{ left: '33.33%' }}>
-              <div className="h-full w-px bg-[#27272a]/60 border-dashed" />
+              <div className="h-full w-px bg-border/60" />
             </div>
             {/* Labels */}
-            <div className="absolute -bottom-5 left-0 text-[10px] text-[#52525b]">Today</div>
-            <div className="absolute -bottom-5 text-[10px] text-[#52525b] -translate-x-1/2" style={{ left: '33.33%' }}>30d</div>
-            <div className="absolute -bottom-5 right-0 text-[10px] text-[#52525b]">90d</div>
+            <div className="absolute -bottom-5 left-0 text-[10px] text-muted-foreground/60">Today</div>
+            <div className="absolute -bottom-5 text-[10px] text-muted-foreground/60 -translate-x-1/2" style={{ left: '33.33%' }}>30d</div>
+            <div className="absolute -bottom-5 right-0 text-[10px] text-muted-foreground/60">90d</div>
 
             {/* Markers */}
             {events.map(ev => {
@@ -335,7 +351,7 @@ export default async function DashboardPage() {
                   href={`/contracts/${ev.contract_id}`}
                   style={{ left: `${pct}%` }}
                   title={`${contractName} — ${ev.event_label} (${days}d)`}
-                  className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full border-2 ${markerColor(days)} ${markerBorder(days)} hover:scale-150 transition-transform cursor-pointer z-10`}
+                  className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full border-2 ${markerColor(days)} ${markerBorder(days)} ${days < 14 ? 'shadow-glow-soft' : ''} hover:scale-150 transition-transform cursor-pointer z-10`}
                 />
               )
             })}
@@ -348,73 +364,88 @@ export default async function DashboardPage() {
       {/* Bottom row: upcoming deadlines + recent contracts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {/* Upcoming deadlines */}
-        <div className="bg-surface border border-[#27272a] rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">Upcoming Deadlines</h2>
+        {/* Upcoming deadlines — timeline rail, same as the site's alerts view */}
+        <div className="rounded-xl border border-border bg-surface-2/40 p-5">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-4">Upcoming deadlines</p>
           {upcomingDeadlines.length === 0 ? (
-            <p className="text-sm text-[#52525b] text-center py-6">No upcoming deadlines</p>
+            <p className="text-sm text-muted-foreground/60 text-center py-6">No upcoming deadlines</p>
           ) : (
-            <div className="space-y-1">
-              {upcomingDeadlines.map(ev => {
-                const days = daysFromToday(ev.event_date)
-                const contractName = (ev.contracts as { id?: string; contract_name?: string } | null)?.contract_name ?? 'Contract'
-                return (
-                  <Link
-                    key={ev.id}
-                    href={`/contracts/${ev.contract_id}`}
-                    className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-white/5 transition-colors group"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm text-white truncate">{contractName}</p>
-                      <p className="text-xs text-[#a1a1aa] mt-0.5">{ev.event_label} · {formatDate(ev.event_date)}</p>
+            <div className="relative pl-4">
+              {/* vertical timeline rail */}
+              <div className="absolute left-1.5 top-2 bottom-2 w-px bg-gradient-to-b from-primary/40 via-border to-transparent" />
+
+              <div className="space-y-2">
+                {upcomingDeadlines.map((ev, i) => {
+                  const days = daysFromToday(ev.event_date)
+                  const contractName = (ev.contracts as { id?: string; contract_name?: string } | null)?.contract_name ?? 'Contract'
+                  const tone = days < 14
+                    ? { node: 'bg-danger border-danger/40', chip: 'bg-danger/15 text-danger', border: 'border-danger/25 bg-danger/[0.04]' }
+                    : days < 30
+                    ? { node: 'bg-warning border-warning/40', chip: 'bg-warning/15 text-warning', border: 'border-warning/25 bg-warning/[0.04]' }
+                    : { node: 'bg-primary border-primary/40', chip: 'bg-primary/15 text-primary', border: 'border-primary/20 bg-primary/[0.03]' }
+                  return (
+                    <div key={ev.id} className="relative">
+                      <div className={`absolute -left-[13px] top-3 size-3 rounded-full border-2 ${tone.node} ${i === 0 ? 'shadow-glow-soft' : ''}`}>
+                        {i === 0 && days < 14 && (
+                          <span className="absolute inset-0 rounded-full border-2 border-danger/60 pulse-ring text-danger" />
+                        )}
+                      </div>
+                      <Link
+                        href={`/contracts/${ev.contract_id}`}
+                        className={`flex items-center justify-between gap-2 rounded-md border ${tone.border} p-2.5 hover:brightness-125 transition-all group`}
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm text-foreground truncate">{contractName}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{ev.event_label} · {formatDate(ev.event_date)}</p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded tabular-nums ${tone.chip}`}>{days}d</span>
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
+                        </div>
+                      </Link>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0 ml-4">
-                      <span className={`text-sm font-semibold tabular-nums ${days < 14 ? 'text-red-400' : days < 30 ? 'text-amber-400' : 'text-green-400'}`}>
-                        {days}d
-                      </span>
-                      <ChevronRight className="w-3.5 h-3.5 text-[#52525b] group-hover:text-[#a1a1aa] transition-colors" />
-                    </div>
-                  </Link>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
           )}
         </div>
 
         {/* Recent contracts */}
-        <div className="bg-surface border border-[#27272a] rounded-xl p-5">
+        <div className="rounded-xl border border-border bg-surface-2/40 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-white">Recent Contracts</h2>
-            <Link href="/vault" className="text-xs text-accent hover:text-accent-hover transition-colors">
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Recent contracts</p>
+            <Link href="/vault" className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+              <span className="size-1 rounded-full bg-primary animate-breathe" />
               View all
             </Link>
           </div>
           {recent.length === 0 ? (
-            <p className="text-sm text-[#52525b] text-center py-6">No contracts yet</p>
+            <p className="text-sm text-muted-foreground/60 text-center py-6">No contracts yet</p>
           ) : (
             <div className="space-y-1">
               {recent.map(c => (
                 <Link
                   key={c.id}
                   href={`/contracts/${c.id}`}
-                  className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-white/5 transition-colors group"
+                  className="flex items-center justify-between gap-2 rounded-md px-2 py-2 border border-transparent hover:bg-primary/[0.06] hover:border-primary/20 transition-all group"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-7 h-7 rounded-lg bg-[#1a1a1a] flex items-center justify-center shrink-0">
-                      <FileText className="w-3.5 h-3.5 text-[#a1a1aa]" />
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="size-8 rounded-md bg-primary/10 border border-primary/20 grid place-items-center shrink-0">
+                      <FileText className="w-3.5 h-3.5 text-primary" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm text-white truncate">{c.contract_name}</p>
-                      <p className="text-xs text-[#a1a1aa] mt-0.5 truncate">
+                      <p className="text-sm text-foreground truncate">{c.contract_name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
                         {c.counterparty_name ?? 'Unknown counterparty'}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-4">
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${STATUS_BADGE[c.status] ?? 'bg-[#1a1a1a] text-[#a1a1aa]'}`}>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${STATUS_BADGE[c.status] ?? 'bg-surface-2 text-muted-foreground'}`}>
                       {STATUS_LABEL[c.status] ?? c.status}
                     </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-[#52525b] group-hover:text-[#a1a1aa] transition-colors" />
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
                   </div>
                 </Link>
               ))}

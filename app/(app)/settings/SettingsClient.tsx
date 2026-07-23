@@ -54,10 +54,10 @@ const PLAN_LABEL: Record<PlanTier, string> = {
 }
 
 const PLAN_COLOUR: Record<PlanTier, string> = {
-  free: 'text-[#a1a1aa] bg-[#1a1a1a] border-[#27272a]',
-  starter: 'text-accent bg-accent/10 border-accent/20',
-  business: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
-  agency: 'text-green-400 bg-green-400/10 border-green-400/20',
+  free: 'text-muted-foreground bg-surface-2/60 border-border',
+  starter: 'text-primary bg-primary/10 border-primary/20',
+  business: 'text-warning bg-warning/15 border-warning/20',
+  agency: 'text-success bg-success/15 border-success/20',
 }
 
 // ─── section wrapper ──────────────────────────────────────────────────────────
@@ -69,10 +69,12 @@ function Section({ id, title, icon: Icon, children }: {
   children: React.ReactNode
 }) {
   return (
-    <div id={id} className="bg-surface border border-[#27272a] rounded-xl p-6 scroll-mt-20">
-      <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-[#1a1a1a]">
-        <Icon className="w-4 h-4 text-[#a1a1aa]" />
-        <h2 className="text-sm font-semibold text-white">{title}</h2>
+    <div id={id} className="rounded-xl border border-border bg-surface-2/40 p-6 scroll-mt-20">
+      <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-border/60">
+        <div className="size-7 rounded-md bg-primary/10 border border-primary/20 grid place-items-center">
+          <Icon className="w-3.5 h-3.5 text-primary" />
+        </div>
+        <h2 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{title}</h2>
       </div>
       {children}
     </div>
@@ -81,10 +83,17 @@ function Section({ id, title, icon: Icon, children }: {
 
 // ─── save banner ──────────────────────────────────────────────────────────────
 
-function SaveBanner({ saved }: { saved: boolean }) {
+function SaveBanner({ saved, error }: { saved: boolean; error: string | null }) {
+  if (error) {
+    return (
+      <div className="fixed bottom-6 right-6 flex items-center gap-2 px-4 py-2.5 bg-danger/10 border border-danger/20 text-danger text-sm font-medium rounded-xl shadow-xl z-50 animate-in fade-in slide-in-from-bottom-2">
+        <AlertTriangle className="w-4 h-4" /> {error}
+      </div>
+    )
+  }
   if (!saved) return null
   return (
-    <div className="fixed bottom-6 right-6 flex items-center gap-2 px-4 py-2.5 bg-green-500/10 border border-green-500/20 text-green-400 text-sm font-medium rounded-xl shadow-xl z-50 animate-in fade-in slide-in-from-bottom-2">
+    <div className="fixed bottom-6 right-6 flex items-center gap-2 px-4 py-2.5 bg-success/10 border border-success/20 text-success text-sm font-medium rounded-xl shadow-xl z-50 animate-in fade-in slide-in-from-bottom-2">
       <Check className="w-4 h-4" /> Changes saved
     </div>
   )
@@ -100,35 +109,35 @@ function DeleteModal({ onConfirm, onCancel, loading }: {
   const [confirm, setConfirm] = useState('')
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-surface border border-[#27272a] rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl">
+      <div className="rounded-2xl border border-border bg-[#0e0e10] p-6 max-w-sm w-full mx-4 shadow-card">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-full bg-red-400/10">
-            <AlertTriangle className="w-5 h-5 text-red-400" />
+          <div className="p-2 rounded-full bg-danger/10">
+            <AlertTriangle className="w-5 h-5 text-danger" />
           </div>
-          <h2 className="text-white font-semibold text-lg">Delete account</h2>
+          <h2 className="text-foreground font-semibold text-lg">Delete account</h2>
         </div>
-        <p className="text-[#a1a1aa] text-sm mb-4 leading-relaxed">
+        <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
           This will permanently delete your account and all contracts. This cannot be undone.
         </p>
-        <p className="text-[#a1a1aa] text-sm mb-2">Type <span className="text-white font-mono">delete</span> to confirm:</p>
+        <p className="text-muted-foreground text-sm mb-2">Type <span className="text-foreground font-mono">delete</span> to confirm:</p>
         <input
           value={confirm}
           onChange={e => setConfirm(e.target.value)}
-          className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:border-red-400/50 mb-4 transition-colors"
+          className="w-full bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-danger/50 mb-4 transition-colors"
           placeholder="delete"
         />
         <div className="flex gap-3">
           <button
             onClick={onCancel}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 rounded-lg border border-[#27272a] text-[#a1a1aa] hover:text-white transition-colors text-sm disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors text-sm disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading || confirm !== 'delete'}
-            className="flex-1 px-4 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 rounded-lg bg-danger hover:bg-danger/90 text-foreground text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Deleting…</> : 'Delete account'}
           </button>
@@ -180,23 +189,33 @@ function BillingSection({ planTier, contractLimit, hasStripeCustomer }: {
 
   async function openPortal() {
     setPortalLoading(true)
-    const res = await fetch('/api/stripe/portal', { method: 'POST' })
-    const { url } = await res.json()
-    if (url) window.location.href = url
-    else setPortalLoading(false)
+    setBillingError(null)
+    try {
+      const res = await fetch('/api/stripe/portal', { method: 'POST' })
+      const body = await res.json()
+      if (body.url) {
+        window.location.href = body.url
+      } else {
+        setBillingError(body.error ?? 'Could not open the billing portal — please try again.')
+        setPortalLoading(false)
+      }
+    } catch {
+      setBillingError('Network error — please try again.')
+      setPortalLoading(false)
+    }
   }
 
   return (
     <Section id="billing" title="Billing" icon={CreditCard}>
       <div className="space-y-6">
-        <div className="flex items-center justify-between p-4 bg-[#1a1a1a] rounded-xl border border-[#27272a]">
+        <div className="flex items-center justify-between p-4 bg-surface-2/60 rounded-xl border border-border">
           <div>
-            <p className="text-xs text-[#a1a1aa] uppercase tracking-wide font-medium mb-1">Current plan</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">Current plan</p>
             <div className="flex items-center gap-2">
               <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${PLAN_COLOUR[planTier]}`}>
                 {PLAN_LABEL[planTier]}
               </span>
-              <span className="text-sm text-[#a1a1aa]">
+              <span className="text-sm text-muted-foreground">
                 {contractLimit !== null ? `${contractLimit} contracts` : 'Unlimited contracts'}
               </span>
             </div>
@@ -205,7 +224,7 @@ function BillingSection({ planTier, contractLimit, hasStripeCustomer }: {
             <button
               onClick={openPortal}
               disabled={portalLoading}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#27272a] text-[#a1a1aa] hover:text-white hover:border-[#3f3f46] text-xs transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 text-xs transition-colors disabled:opacity-50"
             >
               {portalLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
               Manage billing
@@ -214,27 +233,27 @@ function BillingSection({ planTier, contractLimit, hasStripeCustomer }: {
         </div>
 
         {billingError && (
-          <p className="mb-3 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{billingError}</p>
+          <p className="mb-3 text-xs text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">{billingError}</p>
         )}
 
         <div className="space-y-2">
           {PLANS.map(plan => (
             <div
               key={plan.tier}
-              className={`p-4 rounded-xl border ${plan.tier === planTier ? 'border-accent/30 bg-accent/5' : 'border-[#27272a] bg-[#0a0a0a]'}`}
+              className={`p-4 rounded-xl border ${plan.tier === planTier ? 'border-primary/30 bg-primary/5' : 'border-border bg-surface-2/30'}`}
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-white">{plan.label}</span>
-                  {plan.tier === planTier && <span className="text-xs text-accent font-medium">Current</span>}
+                  <span className="text-sm font-semibold text-foreground">{plan.label}</span>
+                  {plan.tier === planTier && <span className="text-xs text-primary font-medium">Current</span>}
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold text-white">{plan.price}</span>
+                  <span className="text-sm font-semibold text-foreground">{plan.price}</span>
                   {plan.tier !== planTier && plan.tier !== 'free' && (
                     <button
                       onClick={() => upgrade(plan.tier)}
                       disabled={loadingPlan !== null}
-                      className="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-xs font-medium transition-colors flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft disabled:opacity-50 text-foreground text-xs font-medium transition-colors flex items-center gap-1.5"
                     >
                       {loadingPlan === plan.tier && <Loader2 className="w-3 h-3 animate-spin" />}
                       Upgrade
@@ -242,11 +261,11 @@ function BillingSection({ planTier, contractLimit, hasStripeCustomer }: {
                   )}
                 </div>
               </div>
-              <p className="text-xs text-[#a1a1aa] mb-2">{plan.limit}</p>
+              <p className="text-xs text-muted-foreground mb-2">{plan.limit}</p>
               <div className="flex flex-wrap gap-x-4 gap-y-1">
                 {plan.features.map(f => (
-                  <span key={f} className="text-xs text-[#a1a1aa] flex items-center gap-1">
-                    <Check className="w-3 h-3 text-green-400 shrink-0" />{f}
+                  <span key={f} className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Check className="w-3 h-3 text-success shrink-0" />{f}
                   </span>
                 ))}
               </div>
@@ -309,12 +328,18 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
 
   // Saved flash
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   function flashSaved() {
+    setSaveError(null)
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
   }
+  function flashError(message: string) {
+    setSaveError(message)
+    setTimeout(() => setSaveError(null), 4000)
+  }
 
-  const planTier = (profile?.plan_tier ?? 'starter') as PlanTier
+  const planTier = (profile?.plan_tier ?? 'free') as PlanTier
   const contractLimit = PLAN_LIMITS[planTier]
 
   const [activeSection, setActiveSection] = useState('profile')
@@ -343,13 +368,14 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
   async function saveProfile() {
     setSavingProfile(true)
     const supabase = createClient()
-    await supabase.from('users').update({
+    const { error } = await supabase.from('users').update({
       full_name: fullName.trim() || null,
       company_name: company.trim() || null,
       industry: industry.trim() || null,
     }).eq('id', userId)
     setSavingProfile(false)
-    flashSaved()
+    if (error) flashError('Could not save your profile — please try again.')
+    else flashSaved()
   }
 
   // ── save business profile ───────────────────────────────────────────────────
@@ -363,7 +389,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
       biggestHeadache: bizHeadache,
       contractVolume: contractVol,
     })
-    await supabase.from('users').update({
+    const { error } = await supabase.from('users').update({
       business_type: bizType || null,
       contract_volume: contractVol || null,
       contract_types: bizContractTypes,
@@ -372,14 +398,15 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
       personalisation_context: personalisationContext || null,
     }).eq('id', userId)
     setSavingBusiness(false)
-    flashSaved()
+    if (error) flashError('Could not save your business profile — please try again.')
+    else flashSaved()
   }
 
   // ── save notifications ──────────────────────────────────────────────────────
   async function saveNotifications() {
     setSavingNotifs(true)
     const supabase = createClient()
-    await supabase.from('user_settings').update({
+    const { error } = await supabase.from('user_settings').update({
       email_alerts_enabled: emailAlertsEnabled,
       alert_days_before: [...alertDays].sort((a, b) => b - a),
       extra_recipients: extraRecipients,
@@ -387,7 +414,8 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
       phone_number: phoneNumber.trim() || null,
     }).eq('user_id', userId)
     setSavingNotifs(false)
-    flashSaved()
+    if (error) flashError('Could not save your notification settings — please try again.')
+    else flashSaved()
   }
 
   function toggleAlertDay(day: number) {
@@ -431,11 +459,25 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
   // ── delete account ──────────────────────────────────────────────────────────
   async function deleteAccount() {
     setDeletingAccount(true)
-    const supabase = createClient()
-    // Deleting the user row cascades to contracts, events, alerts, settings
-    await supabase.from('users').delete().eq('id', userId)
-    await supabase.auth.signOut()
-    router.push('/login')
+    try {
+      // Deletion needs the service role (auth user + storage files), so it
+      // runs through a server route — RLS blocks deleting the users row here.
+      const res = await fetch('/api/account/delete', { method: 'POST' })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        flashError((body as { error?: string }).error ?? 'Failed to delete account — please try again.')
+        setDeletingAccount(false)
+        setShowDeleteModal(false)
+        return
+      }
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push('/login')
+    } catch {
+      flashError('Network error — please try again.')
+      setDeletingAccount(false)
+      setShowDeleteModal(false)
+    }
   }
 
   return (
@@ -447,19 +489,19 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           loading={deletingAccount}
         />
       )}
-      <SaveBanner saved={saved} />
+      <SaveBanner saved={saved} error={saveError} />
 
       {/* mobile nav strip */}
-      <div className="md:hidden flex gap-1 overflow-x-auto pb-3 mb-6 border-b border-[#1a1a1a]">
+      <div className="md:hidden flex gap-1 overflow-x-auto pb-3 mb-6 border-b border-border/60">
         {NAV_SECTIONS.map(nav => (
           <button
             key={nav.id}
             onClick={() => scrollToSection(nav.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
-              activeSection === nav.id ? 'bg-accent/10 text-white' : 'text-[#a1a1aa] hover:text-white'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap border transition-all ${
+              activeSection === nav.id ? 'bg-primary/15 text-primary border-primary/30' : 'text-muted-foreground border-transparent hover:text-foreground'
             }`}
           >
-            <nav.icon className={`w-3.5 h-3.5 shrink-0 ${activeSection === nav.id ? 'text-accent' : ''}`} />
+            <nav.icon className={`w-3.5 h-3.5 shrink-0 ${activeSection === nav.id ? 'text-primary' : ''}`} />
             {nav.label}
           </button>
         ))}
@@ -469,21 +511,21 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
         {/* sidebar — desktop only */}
         <aside className="hidden md:flex flex-col w-44 sticky top-20 shrink-0">
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold text-white">Settings</h1>
-            <p className="text-[#a1a1aa] mt-2 text-sm">Manage your account and preferences</p>
+            <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
+            <p className="text-muted-foreground mt-2 text-sm">Manage your account and preferences</p>
           </div>
           <nav className="space-y-0.5">
             {NAV_SECTIONS.map(nav => (
               <button
                 key={nav.id}
                 onClick={() => scrollToSection(nav.id)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm border transition-all ${
                   activeSection === nav.id
-                    ? 'bg-accent/10 text-white'
-                    : 'text-[#a1a1aa] hover:text-white hover:bg-[#1a1a1a]'
+                    ? 'bg-primary/10 text-primary border-primary/20 shadow-glow-soft'
+                    : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-white/[0.03]'
                 }`}
               >
-                <nav.icon className={`w-4 h-4 shrink-0 ${activeSection === nav.id ? 'text-accent' : 'text-[#52525b]'}`} />
+                <nav.icon className={`w-4 h-4 shrink-0 ${activeSection === nav.id ? 'text-primary' : 'text-muted-foreground/60'}`} />
                 {nav.label}
               </button>
             ))}
@@ -494,46 +536,46 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
         <div className="flex-1 min-w-0 space-y-6">
           {/* mobile header */}
           <div className="md:hidden mb-2">
-            <h1 className="text-2xl font-semibold text-white">Settings</h1>
-            <p className="text-[#a1a1aa] mt-1 text-sm">Manage your account and preferences</p>
+            <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
+            <p className="text-muted-foreground mt-1 text-sm">Manage your account and preferences</p>
           </div>
 
           {/* ── Profile ── */}
           <Section id="profile" title="Profile" icon={User}>
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Email</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">Email</label>
             <input
               disabled
               value={authEmail}
-              className="w-full bg-[#0a0a0a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-[#52525b] cursor-not-allowed"
+              className="w-full bg-surface-2/30 border border-border rounded-lg px-3.5 py-2.5 text-sm text-muted-foreground/60 cursor-not-allowed"
             />
-            <p className="text-xs text-[#52525b] mt-1">Email cannot be changed</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Email cannot be changed</p>
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Full name</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">Full name</label>
             <input
               value={fullName}
               onChange={e => setFullName(e.target.value)}
               placeholder="Jane Smith"
-              className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+              className="w-full bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Company</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">Company</label>
             <input
               value={company}
               onChange={e => setCompany(e.target.value)}
               placeholder="Acme Ltd"
-              className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+              className="w-full bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Industry</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">Industry</label>
             <select
               value={industry}
               onChange={e => setIndustry(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors appearance-none"
+              className="w-full bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors appearance-none"
             >
               <option value="">Select industry...</option>
               {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
@@ -542,7 +584,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           <button
             onClick={saveProfile}
             disabled={savingProfile}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-foreground text-sm font-medium transition-colors disabled:opacity-50"
           >
             {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {savingProfile ? 'Saving…' : 'Save profile'}
@@ -553,17 +595,17 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           {/* ── Business Profile ── */}
           <Section id="business" title="Business Profile" icon={Briefcase}>
         <div className="space-y-5">
-          <p className="text-xs text-[#52525b] -mt-2">
+          <p className="text-xs text-muted-foreground/60 -mt-2">
             These answers personalise Claude&apos;s contract analysis to your industry and situation.
           </p>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Business type</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">Business type</label>
               <select
                 value={bizType}
                 onChange={e => setBizType(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors appearance-none"
+                className="w-full bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors appearance-none"
               >
                 <option value="">Select...</option>
                 <option value="sole_trader">Sole Trader</option>
@@ -573,11 +615,11 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Contract volume</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">Contract volume</label>
               <select
                 value={contractVol}
                 onChange={e => setContractVol(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors appearance-none"
+                className="w-full bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors appearance-none"
               >
                 <option value="">Select...</option>
                 <option value="1-5">1–5 contracts</option>
@@ -589,7 +631,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#a1a1aa] mb-2 uppercase tracking-wide">Contract types you deal with</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Contract types you deal with</label>
             <div className="flex flex-wrap gap-2">
               {CONTRACT_TYPE_OPTIONS.map(t => (
                 <button
@@ -598,8 +640,8 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
                   onClick={() => setBizContractTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t])}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                     bizContractTypes.includes(t)
-                      ? 'bg-accent/10 text-accent border-accent/20'
-                      : 'bg-[#1a1a1a] text-[#a1a1aa] border-[#27272a] hover:border-[#3f3f46] hover:text-white'
+                      ? 'bg-primary/10 text-primary border-primary/20'
+                      : 'bg-surface-2/60 text-muted-foreground border-border hover:border-primary/30 hover:text-foreground'
                   }`}
                 >
                   {t}
@@ -609,11 +651,11 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Biggest contract headache</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">Biggest contract headache</label>
             <select
               value={bizHeadache}
               onChange={e => setBizHeadache(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors appearance-none"
+              className="w-full bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors appearance-none"
             >
               <option value="">Select...</option>
               {HEADACHE_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
@@ -621,11 +663,11 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">Have you been caught out by a clause?</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">Have you been caught out by a clause?</label>
             <select
               value={bizCaughtOut}
               onChange={e => setBizCaughtOut(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors appearance-none"
+              className="w-full bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors appearance-none"
             >
               <option value="">Select...</option>
               <option value="yes_costly">Yes, it cost me money</option>
@@ -638,7 +680,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           <button
             onClick={saveBusinessProfile}
             disabled={savingBusiness}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-foreground text-sm font-medium transition-colors disabled:opacity-50"
           >
             {savingBusiness ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {savingBusiness ? 'Saving…' : 'Save business profile'}
@@ -651,8 +693,8 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
         <div className="space-y-6">
           {/* Notification preference */}
           <div>
-            <p className="text-sm text-white font-medium mb-1">Alert method</p>
-            <p className="text-xs text-[#a1a1aa] mb-3">How you want to receive deadline notifications</p>
+            <p className="text-sm text-foreground font-medium mb-1">Alert method</p>
+            <p className="text-xs text-muted-foreground mb-3">How you want to receive deadline notifications</p>
             <div className="space-y-2">
               {([
                 { value: 'email_only', label: 'Email only', desc: 'Alerts sent to your inbox' },
@@ -665,17 +707,17 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
                   onClick={() => setNotifPref(p.value)}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm border transition-colors ${
                     notifPref === p.value
-                      ? 'bg-accent/10 border-accent/30'
-                      : 'bg-[#1a1a1a] border-[#27272a] hover:border-[#3f3f46]'
+                      ? 'bg-primary/10 border-primary/30'
+                      : 'bg-surface-2/60 border-border hover:border-primary/30'
                   }`}
                 >
                   <div className="text-left">
-                    <p className={`font-medium text-sm ${notifPref === p.value ? 'text-white' : 'text-[#a1a1aa]'}`}>{p.label}</p>
-                    <p className="text-xs text-[#52525b]">{p.desc}</p>
+                    <p className={`font-medium text-sm ${notifPref === p.value ? 'text-foreground' : 'text-muted-foreground'}`}>{p.label}</p>
+                    <p className="text-xs text-muted-foreground/60">{p.desc}</p>
                   </div>
                   {notifPref === p.value && (
-                    <div className="w-4 h-4 rounded-full bg-accent flex items-center justify-center shrink-0">
-                      <Check className="w-2.5 h-2.5 text-white" />
+                    <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shrink-0">
+                      <Check className="w-2.5 h-2.5 text-foreground" />
                     </div>
                   )}
                 </button>
@@ -683,15 +725,15 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
             </div>
             {notifPref === 'email_sms' && (
               <div className="mt-3">
-                <label className="block text-xs font-medium text-[#a1a1aa] mb-1.5 uppercase tracking-wide">
-                  Phone number <span className="text-[#52525b] normal-case font-normal">(optional)</span>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">
+                  Phone number <span className="text-muted-foreground/60 normal-case font-normal">(optional)</span>
                 </label>
                 <input
                   type="tel"
                   value={phoneNumber}
                   onChange={e => setPhoneNumber(e.target.value)}
                   placeholder="+61 400 000 000"
-                  className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+                  className="w-full bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
                 />
               </div>
             )}
@@ -700,12 +742,12 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           {/* Email alerts toggle */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-white font-medium">Email alerts</p>
-              <p className="text-xs text-[#a1a1aa] mt-0.5">Receive deadline reminders by email</p>
+              <p className="text-sm text-foreground font-medium">Email alerts</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Receive deadline reminders by email</p>
             </div>
             <button
               onClick={() => setEmailAlertsEnabled(e => !e)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${emailAlertsEnabled ? 'bg-accent' : 'bg-[#27272a]'}`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${emailAlertsEnabled ? 'bg-primary' : 'bg-border'}`}
             >
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${emailAlertsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
@@ -713,8 +755,8 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
 
           {/* Alert days */}
           <div>
-            <p className="text-sm text-white font-medium mb-1">Alert me before deadlines</p>
-            <p className="text-xs text-[#a1a1aa] mb-3">Select how many days in advance you want reminders</p>
+            <p className="text-sm text-foreground font-medium mb-1">Alert me before deadlines</p>
+            <p className="text-xs text-muted-foreground mb-3">Select how many days in advance you want reminders</p>
             <div className="flex flex-wrap gap-2">
               {ALERT_DAY_OPTIONS.map(day => (
                 <button
@@ -722,8 +764,8 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
                   onClick={() => toggleAlertDay(day)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
                     alertDays.includes(day)
-                      ? 'bg-accent/10 text-accent border-accent/20'
-                      : 'bg-transparent text-[#a1a1aa] border-[#27272a] hover:border-[#3f3f46] hover:text-white'
+                      ? 'bg-primary/10 text-primary border-primary/20'
+                      : 'bg-transparent text-muted-foreground border-border hover:border-primary/30 hover:text-foreground'
                   }`}
                 >
                   {day} days
@@ -734,15 +776,15 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
 
           {/* Extra recipients */}
           <div>
-            <p className="text-sm text-white font-medium mb-1">Extra recipients</p>
-            <p className="text-xs text-[#a1a1aa] mb-3">Send alerts to additional email addresses</p>
+            <p className="text-sm text-foreground font-medium mb-1">Extra recipients</p>
+            <p className="text-xs text-muted-foreground mb-3">Send alerts to additional email addresses</p>
             <div className="space-y-2 mb-3">
               {extraRecipients.map(email => (
-                <div key={email} className="flex items-center justify-between py-2 px-3 bg-[#1a1a1a] border border-[#27272a] rounded-lg">
-                  <span className="text-sm text-[#a1a1aa]">{email}</span>
+                <div key={email} className="flex items-center justify-between py-2 px-3 bg-surface-2/60 border border-border rounded-lg">
+                  <span className="text-sm text-muted-foreground">{email}</span>
                   <button
                     onClick={() => setExtraRecipients(prev => prev.filter(e => e !== email))}
-                    className="text-[#52525b] hover:text-red-400 transition-colors"
+                    className="text-muted-foreground/60 hover:text-danger transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -756,11 +798,11 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
                 onChange={e => setNewRecipient(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addRecipient()}
                 placeholder="colleague@company.com"
-                className="flex-1 bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+                className="flex-1 bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
               />
               <button
                 onClick={addRecipient}
-                className="px-3 py-2.5 rounded-lg border border-[#27272a] text-[#a1a1aa] hover:text-white hover:border-[#3f3f46] transition-colors"
+                className="px-3 py-2.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -770,7 +812,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           <button
             onClick={saveNotifications}
             disabled={savingNotifs}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-foreground text-sm font-medium transition-colors disabled:opacity-50"
           >
             {savingNotifs ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {savingNotifs ? 'Saving…' : 'Save notifications'}
@@ -786,10 +828,10 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
         <div className="space-y-8">
           {/* Change password */}
           <div>
-            <h3 className="text-sm font-medium text-white mb-4">Change password</h3>
+            <h3 className="text-sm font-medium text-foreground mb-4">Change password</h3>
             <form onSubmit={changePassword} className="space-y-3">
               {passwordError && (
-                <div className="px-3.5 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                <div className="px-3.5 py-2.5 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
                   {passwordError}
                 </div>
               )}
@@ -800,7 +842,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
                 placeholder="New password (min. 8 characters)"
                 minLength={8}
                 required
-                className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+                className="w-full bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
               />
               <input
                 type="password"
@@ -808,12 +850,12 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder="Confirm new password"
                 required
-                className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+                className="w-full bg-surface-2/60 border border-border rounded-lg px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
               />
               <button
                 type="submit"
                 disabled={savingPassword}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-foreground text-sm font-medium transition-colors disabled:opacity-50"
               >
                 {savingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 {savingPassword ? 'Updating…' : 'Update password'}
@@ -822,30 +864,30 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           </div>
 
           {/* Sign out */}
-          <div className="border-t border-[#1a1a1a] pt-6">
-            <h3 className="text-sm font-medium text-white mb-1">Sign out</h3>
-            <p className="text-xs text-[#a1a1aa] mb-3">Sign out of your account on this device</p>
+          <div className="border-t border-border/60 pt-6">
+            <h3 className="text-sm font-medium text-foreground mb-1">Sign out</h3>
+            <p className="text-xs text-muted-foreground mb-3">Sign out of your account on this device</p>
             <button
               onClick={async () => {
                 const supabase = createClient()
                 await supabase.auth.signOut()
                 router.push('/login')
               }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#27272a] text-[#a1a1aa] hover:text-white hover:border-[#3f3f46] text-sm transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 text-sm transition-colors"
             >
               <LogOut className="w-4 h-4" /> Sign out
             </button>
           </div>
 
           {/* Danger zone */}
-          <div className="border-t border-red-500/10 pt-6">
-            <h3 className="text-sm font-medium text-red-400 mb-1">Danger zone</h3>
-            <p className="text-xs text-[#a1a1aa] mb-3">
+          <div className="border-t border-danger/10 pt-6">
+            <h3 className="text-sm font-medium text-danger mb-1">Danger zone</h3>
+            <p className="text-xs text-muted-foreground mb-3">
               Permanently delete your account and all contract data. This cannot be undone.
             </p>
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 text-sm transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-danger/20 text-danger hover:bg-danger/10 text-sm transition-colors"
             >
               <AlertTriangle className="w-4 h-4" /> Delete account
             </button>
