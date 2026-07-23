@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [agreed, setAgreed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [oauthLoading, setOauthLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -19,6 +20,10 @@ export default function SignupPage() {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
+    if (!agreed) {
+      setError('Please agree to the Terms and Conditions and Privacy Policy to continue.')
+      return
+    }
     setLoading(true)
     setError(null)
 
@@ -42,6 +47,10 @@ export default function SignupPage() {
   }
 
   async function handleGoogleSignup() {
+    if (!agreed) {
+      setError('Please agree to the Terms and Conditions and Privacy Policy to continue.')
+      return
+    }
     setOauthLoading(true)
     setError(null)
 
@@ -147,6 +156,26 @@ export default function SignupPage() {
                 className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
               />
             </div>
+
+            <label className="flex items-start gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={e => setAgreed(e.target.checked)}
+                required
+                className="mt-0.5 w-4 h-4 rounded border-[#27272a] bg-[#1a1a1a] accent-[#6366f1] shrink-0"
+              />
+              <span className="text-xs text-[#a1a1aa] leading-relaxed">
+                I agree to the{' '}
+                <Link href="/terms" target="_blank" className="text-accent hover:text-accent-hover transition-colors">
+                  Terms and Conditions
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" target="_blank" className="text-accent hover:text-accent-hover transition-colors">
+                  Privacy Policy
+                </Link>
+              </span>
+            </label>
 
             <button
               type="submit"

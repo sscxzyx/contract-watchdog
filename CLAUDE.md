@@ -16,7 +16,7 @@ Controva — an AI-powered contract monitoring platform for small businesses. Bu
 - **Database/Auth:** Supabase (Postgres, Auth, Storage)
 - **AI:** Anthropic Claude API (`claude-sonnet-4-6`)
 - **Email:** Resend (`app/api/cron/alerts/route.ts`)
-- **Payments:** Stripe (Phase 8 — not yet wired)
+- **Payments:** Stripe (checkout, billing portal, webhook — `app/api/stripe/*`, `lib/stripe.ts`)
 
 ## Dev commands
 
@@ -38,6 +38,11 @@ ANTHROPIC_API_KEY=       # from console.anthropic.com
 RESEND_API_KEY=          # from resend.com
 SUPABASE_SERVICE_ROLE_KEY=  # from Supabase project settings → API
 CRON_SECRET=             # any random string, used to secure the cron endpoint
+STRIPE_SECRET_KEY=       # Stripe dashboard → Developers → API keys
+STRIPE_WEBHOOK_SECRET=   # Stripe dashboard → Webhooks → endpoint signing secret
+STRIPE_PRICE_STARTER=    # price IDs from Stripe Products
+STRIPE_PRICE_BUSINESS=
+STRIPE_PRICE_AGENCY=
 ```
 
 ## Design system
@@ -69,7 +74,7 @@ app/
 
 components/
   sidebar.tsx          # responsive: fixed desktop, hamburger drawer mobile
-  OnboardingWizard.tsx # 3-step first-login flow
+  marketing/           # landing page sections (Landing.tsx et al.)
 
 lib/supabase/
   client.ts   # browser client

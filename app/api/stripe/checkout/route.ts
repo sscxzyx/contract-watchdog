@@ -9,8 +9,12 @@ export async function POST(req: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { plan } = await req.json() as { plan: PlanTier }
-  if (!PRICE_IDS[plan]) return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
+  const body = await req.json().catch(() => null)
+  const rawPlan = (body as { plan?: unknown } | null)?.plan
+  if (typeof rawPlan !== 'string' || !PRICE_IDS[rawPlan]) {
+    return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
+  }
+  const plan = rawPlan as PlanTier
 
   const admin = createAdminClient()
   const { data: profile } = await admin.from('users').select('stripe_customer_id, email').eq('id', user.id).single()

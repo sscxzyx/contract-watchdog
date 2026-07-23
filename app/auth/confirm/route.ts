@@ -5,11 +5,18 @@ import { createClient } from '@/lib/supabase/server'
 // Used by Supabase auth email links (password recovery, email confirmation,
 // invites, magic links). The email template must point here:
 //   {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password
+// Only allow same-origin relative paths — anything else (protocol-relative
+// "//evil.com", "@evil.com", full URLs) could turn this into an open redirect.
+function safeNext(next: string | null, fallback: string): string {
+  if (next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\')) return next
+  return fallback
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const token_hash = searchParams.get('token_hash')
   const type = searchParams.get('type') as EmailOtpType | null
-  const next = searchParams.get('next') ?? '/'
+  const next = safeNext(searchParams.get('next'), '/')
 
   if (!token_hash || !type) {
     return NextResponse.redirect(`${origin}/login?error=Invalid+or+missing+confirmation+link`)

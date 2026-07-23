@@ -1,13 +1,44 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Resend } from 'resend'
 import { NextResponse } from 'next/server'
+import { timingSafeEqual } from 'crypto'
 
 export const runtime = 'nodejs'
 
+function secretMatches(header: string | null): boolean {
+  const secret = process.env.CRON_SECRET
+  // Refuse to run at all if the secret isn't configured — otherwise a literal
+  // "Bearer undefined" header would authenticate.
+  if (!secret || !header) return false
+  const expected = Buffer.from(`Bearer ${secret}`)
+  const received = Buffer.from(header)
+  return expected.length === received.length && timingSafeEqual(expected, received)
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+// Alert dates are calendar dates; compute "today" in the product's home
+// timezone so alerts don't shift a day depending on the server's UTC clock.
+function brisbaneToday(): Date {
+  const ymd = new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Brisbane' })
+  return new Date(`${ymd}T00:00:00Z`)
+}
+
+function addDays(base: Date, days: number): string {
+  const d = new Date(base)
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().split('T')[0]
+}
+
 // Called by Vercel Cron or any scheduler — protected by CRON_SECRET
 export async function GET(request: Request) {
-  const auth = request.headers.get('authorization')
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!secretMatches(request.headers.get('authorization'))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -17,7 +48,7 @@ export async function GET(request: Request) {
 
   const supabase = createAdminClient()
   const resend = new Resend(process.env.RESEND_API_KEY)
-  const today = new Date()
+  const today = brisbaneToday()
   let sent = 0
   let skipped = 0
 
@@ -41,53 +72,60 @@ export async function GET(request: Request) {
 
     const recipients = [user.email, ...extraRecipients]
 
-    for (const days of alertDays) {
-      const target = new Date(today)
-      target.setDate(target.getDate() + days)
-      const targetDate = target.toISOString().split('T')[0]
+    // Map each target date back to its days-before value, then fetch all of
+    // this user's matching events in one query instead of one per alert day.
+    const dateToDays = new Map(alertDays.map(days => [addDays(today, days), days]))
 
-      const { data: events } = await supabase
-        .from('contract_events')
-        .select('id, contract_id, event_label, event_date, contracts(contract_name)')
-        .eq('user_id', row.user_id)
-        .eq('event_date', targetDate)
+    const { data: events } = await supabase
+      .from('contract_events')
+      .select('id, contract_id, event_label, event_date, contracts(contract_name)')
+      .eq('user_id', row.user_id)
+      .in('event_date', Array.from(dateToDays.keys()))
 
-      if (!events?.length) continue
+    if (!events?.length) continue
 
-      for (const event of events) {
-        // Dedup: skip if we already sent this alert
-        const { data: existing } = await supabase
-          .from('alerts_log')
-          .select('id')
-          .eq('contract_id', event.contract_id)
-          .eq('alert_type', event.event_label)
-          .eq('days_before', days)
-          .maybeSingle()
+    // One dedup query for all of this user's candidate alerts
+    const { data: alreadySent } = await supabase
+      .from('alerts_log')
+      .select('contract_id, alert_type, days_before')
+      .eq('user_id', row.user_id)
+      .in('contract_id', Array.from(new Set(events.map(e => e.contract_id))))
 
-        if (existing) { skipped++; continue }
+    const sentKeys = new Set(
+      (alreadySent ?? []).map(a => `${a.contract_id}|${a.alert_type}|${a.days_before}`)
+    )
 
-        const contractName = (event.contracts as { contract_name?: string } | null)?.contract_name ?? 'Your contract'
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://controva.co'
+    for (const event of events) {
+      const days = dateToDays.get(event.event_date as string)
+      if (days === undefined) continue
 
-        try {
-          await resend.emails.send({
-            from: 'Controva <alerts@controva.co>',
-            to: recipients,
-            subject: `${event.event_label} in ${days} day${days !== 1 ? 's' : ''} — ${contractName}`,
-            html: buildEmailHtml({ contractName, eventLabel: event.event_label as string, days, eventDate: event.event_date as string, contractId: event.contract_id as string, siteUrl }),
-          })
+      if (sentKeys.has(`${event.contract_id}|${event.event_label}|${days}`)) {
+        skipped++
+        continue
+      }
 
-          await supabase.from('alerts_log').insert({
-            contract_id: event.contract_id,
-            user_id: row.user_id,
-            alert_type: event.event_label,
-            days_before: days,
-          })
+      const contractName = (event.contracts as { contract_name?: string } | null)?.contract_name ?? 'Your contract'
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://controva.co'
 
-          sent++
-        } catch {
-          // Log but don't abort — one failed email shouldn't stop the rest
-        }
+      try {
+        await resend.emails.send({
+          from: 'Controva <alerts@controva.co>',
+          to: recipients,
+          subject: `${event.event_label} in ${days} day${days !== 1 ? 's' : ''} — ${contractName}`,
+          html: buildEmailHtml({ contractName, eventLabel: event.event_label as string, days, eventDate: event.event_date as string, contractId: event.contract_id as string, siteUrl }),
+        })
+
+        await supabase.from('alerts_log').insert({
+          contract_id: event.contract_id,
+          user_id: row.user_id,
+          alert_type: event.event_label,
+          days_before: days,
+        })
+
+        sent++
+      } catch (err) {
+        // Log but don't abort — one failed email shouldn't stop the rest
+        console.error('[cron/alerts] Failed to send alert:', err)
       }
     }
   }
@@ -103,8 +141,12 @@ function buildEmailHtml({ contractName, eventLabel, days, eventDate, contractId,
   contractId: string
   siteUrl: string
 }) {
-  const formatted = new Date(eventDate).toLocaleDateString('en-GB', {
-    day: 'numeric', month: 'long', year: 'numeric',
+  // Contract names and event labels come from AI extraction of user-uploaded
+  // documents — escape them so a crafted document can't inject HTML.
+  const safeName = escapeHtml(contractName)
+  const safeLabel = escapeHtml(eventLabel)
+  const formatted = new Date(eventDate).toLocaleDateString('en-AU', {
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Australia/Brisbane',
   })
   const dot = days <= 7 ? '#f87171' : days <= 14 ? '#fbbf24' : '#4ade80'
   const urgency = days <= 7 ? 'Urgent Alert' : days <= 14 ? 'Reminder' : 'Upcoming Deadline'
@@ -128,10 +170,10 @@ function buildEmailHtml({ contractName, eventLabel, days, eventDate, contractId,
       </div>
 
       <h1 style="color:white;font-size:20px;font-weight:600;margin:0 0 8px 0;line-height:1.3">
-        ${eventLabel} in ${days} day${days !== 1 ? 's' : ''}
+        ${safeLabel} in ${days} day${days !== 1 ? 's' : ''}
       </h1>
       <p style="color:#a1a1aa;font-size:14px;margin:0 0 8px 0;line-height:1.6">
-        <strong style="color:white">${contractName}</strong>
+        <strong style="color:white">${safeName}</strong>
       </p>
       <p style="color:#a1a1aa;font-size:14px;margin:0 0 24px 0">Due date: <strong style="color:white">${formatted}</strong></p>
 

@@ -198,6 +198,7 @@ export default function OnboardingPage() {
   // Step 0 — Plan
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly')
   const [selectedPlan, setSelectedPlan] = useState<PlanTier>('business')
+  const [currentTier, setCurrentTier] = useState<PlanTier>('free')
 
   // Step 1 — Business basics
   const [fullName, setFullName] = useState('')
@@ -237,7 +238,10 @@ export default function OnboardingPage() {
         if (profile.contract_types?.length) setContractTypes(profile.contract_types)
         if (profile.biggest_headache) setHeadache(profile.biggest_headache)
         if (profile.caught_out) setCaughtOut(profile.caught_out)
-        if (profile.plan_tier) setSelectedPlan(profile.plan_tier as PlanTier)
+        if (profile.plan_tier) {
+          setSelectedPlan(profile.plan_tier as PlanTier)
+          setCurrentTier(profile.plan_tier as PlanTier)
+        }
       }
 
       if (settings) {
@@ -256,13 +260,12 @@ export default function OnboardingPage() {
   }
 
   // ── Step 0 ────────────────────────────────────────────────────────────────
-  async function selectPlan(plan: PlanTier) {
-    if (!userId || saving) return
+  // Plan choice is only recorded locally here. plan_tier is a billing column
+  // that clients can't write (see migration 005) — it's set by the Stripe
+  // webhook after checkout completes at the end of the wizard.
+  function selectPlan(plan: PlanTier) {
+    if (saving) return
     setSelectedPlan(plan)
-    setSaving(true)
-    const supabase = createClient()
-    await supabase.from('users').update({ plan_tier: plan }).eq('id', userId)
-    setSaving(false)
     setStep(1)
   }
 
@@ -321,6 +324,26 @@ export default function OnboardingPage() {
         phone_number: phoneNumber.trim() || null,
       }).eq('user_id', userId),
     ])
+
+    // Paid plan chosen at step 0 → send them to Stripe checkout. Their tier
+    // stays 'free' until the webhook confirms the subscription. Skip if they
+    // already have a paid tier so re-running onboarding can't double-subscribe.
+    if (selectedPlan !== 'free' && currentTier === 'free') {
+      try {
+        const res = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: selectedPlan }),
+        })
+        const body = await res.json()
+        if (body.url) {
+          window.location.href = body.url
+          return
+        }
+      } catch {
+        // Checkout unavailable — land on the dashboard; they can upgrade in Settings
+      }
+    }
 
     setSaving(false)
     router.push('/dashboard')
@@ -430,7 +453,7 @@ export default function OnboardingPage() {
             </div>
 
             <p className="text-center text-xs text-[#52525b] mt-8">
-              Stripe billing coming soon. Plans are recorded but payment is not yet processed.
+              14-day free trial on Starter and Business. You&apos;ll enter payment details securely via Stripe after setup.
             </p>
           </div>
         )}
