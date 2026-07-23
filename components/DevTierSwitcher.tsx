@@ -17,8 +17,9 @@ export default function DevTierSwitcher({ currentTier }: { currentTier: string }
   const [error, setError] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
 
+  // Clicking the current tier re-seeds the sample portfolio (handy reset)
   async function switchTier(tier: string) {
-    if (tier === currentTier || switching) return
+    if (switching) return
     setSwitching(tier)
     setError(false)
     try {

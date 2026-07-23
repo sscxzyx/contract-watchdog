@@ -62,7 +62,19 @@ export async function GET(request: Request) {
     return NextResponse.json({ sent: 0, skipped: 0, message: 'No users with alerts enabled' })
   }
 
+  // Email alerts are a paid feature (Starter+). Enforce here — the settings
+  // toggle is client UX only.
+  const { data: plans } = await supabase
+    .from('users')
+    .select('id, plan_tier')
+    .in('id', settings.map(row => row.user_id as string))
+  const tierById = new Map((plans ?? []).map(p => [p.id as string, p.plan_tier as string]))
+
   for (const row of settings) {
+    if ((tierById.get(row.user_id as string) ?? 'free') === 'free') {
+      skipped++
+      continue
+    }
     const alertDays = (row.alert_days_before as number[]) ?? [90, 60, 30, 14, 7]
     const extraRecipients = (row.extra_recipients as string[]) ?? []
 

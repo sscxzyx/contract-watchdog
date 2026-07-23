@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   User, Bell, CreditCard, Shield, Check,
-  Loader2, Plus, X, AlertTriangle, LogOut, Briefcase,
+  Loader2, Plus, X, AlertTriangle, LogOut, Briefcase, Lock, Zap,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { buildPersonalisationContext } from '@/lib/utils/personalisation'
@@ -291,6 +291,12 @@ interface Props {
 export default function SettingsClient({ userId, authEmail, profile, settings }: Props) {
   const router = useRouter()
 
+  const planTier = (profile?.plan_tier ?? 'free') as PlanTier
+  const contractLimit = PLAN_LIMITS[planTier]
+  // Alerts are Starter+; SMS is Business+
+  const alertsAllowed = planTier !== 'free'
+  const smsAllowed = planTier === 'business' || planTier === 'agency'
+
   // Profile state
   const [fullName, setFullName] = useState(profile?.full_name ?? '')
   const [company, setCompany] = useState(profile?.company_name ?? '')
@@ -312,8 +318,12 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
   const [bizCaughtOut, setBizCaughtOut] = useState(profile?.caught_out ?? '')
   const [savingBusiness, setSavingBusiness] = useState(false)
 
-  // Notification preference state
-  const [notifPref, setNotifPref] = useState(settings?.notification_preference ?? 'email_only')
+  // Notification preference state — coerce a stored SMS pref back to email
+  // when the current tier no longer includes SMS (e.g. after a downgrade)
+  const storedPref = settings?.notification_preference ?? 'email_only'
+  const [notifPref, setNotifPref] = useState(
+    storedPref === 'email_sms' && !smsAllowed ? 'email_only' : storedPref
+  )
   const [phoneNumber, setPhoneNumber] = useState(settings?.phone_number ?? '')
 
   // Password state
@@ -338,9 +348,6 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
     setSaveError(message)
     setTimeout(() => setSaveError(null), 4000)
   }
-
-  const planTier = (profile?.plan_tier ?? 'free') as PlanTier
-  const contractLimit = PLAN_LIMITS[planTier]
 
   const [activeSection, setActiveSection] = useState('profile')
 
@@ -410,7 +417,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
       email_alerts_enabled: emailAlertsEnabled,
       alert_days_before: [...alertDays].sort((a, b) => b - a),
       extra_recipients: extraRecipients,
-      notification_preference: notifPref,
+      notification_preference: notifPref === 'email_sms' && !smsAllowed ? 'email_only' : notifPref,
       phone_number: phoneNumber.trim() || null,
     }).eq('user_id', userId)
     setSavingNotifs(false)
@@ -690,6 +697,24 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
 
           {/* ── Notifications ── */}
           <Section id="notifications" title="Notifications" icon={Bell}>
+        {!alertsAllowed ? (
+          <div className="flex flex-col items-center text-center py-8">
+            <div className="size-12 rounded-xl bg-primary/10 border border-primary/20 grid place-items-center mb-4 shadow-glow-soft">
+              <Lock className="w-5 h-5 text-primary" />
+            </div>
+            <p className="text-sm font-medium text-foreground mb-1">Deadline alerts are a paid feature</p>
+            <p className="text-xs text-muted-foreground max-w-xs mb-5">
+              Upgrade to Starter for email alerts before every renewal and notice deadline,
+              or Business for email + SMS.
+            </p>
+            <button
+              onClick={() => scrollToSection('billing')}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground shadow-glow-soft hover:bg-primary/90 hover:shadow-glow transition-all shine"
+            >
+              <Zap className="w-3.5 h-3.5" /> View plans
+            </button>
+          </div>
+        ) : (
         <div className="space-y-6">
           {/* Notification preference */}
           <div>
@@ -700,28 +725,38 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
                 { value: 'email_only', label: 'Email only', desc: 'Alerts sent to your inbox' },
                 { value: 'email_sms', label: 'Email + SMS', desc: 'Email and text message alerts' },
                 { value: 'in_app_only', label: 'In-app only', desc: 'Dashboard notifications only' },
-              ] as const).map(p => (
-                <button
-                  key={p.value}
-                  type="button"
-                  onClick={() => setNotifPref(p.value)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm border transition-colors ${
-                    notifPref === p.value
-                      ? 'bg-primary/10 border-primary/30'
-                      : 'bg-surface-2/60 border-border hover:border-primary/30'
-                  }`}
-                >
-                  <div className="text-left">
-                    <p className={`font-medium text-sm ${notifPref === p.value ? 'text-foreground' : 'text-muted-foreground'}`}>{p.label}</p>
-                    <p className="text-xs text-muted-foreground/60">{p.desc}</p>
-                  </div>
-                  {notifPref === p.value && (
-                    <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shrink-0">
-                      <Check className="w-2.5 h-2.5 text-foreground" />
+              ] as const).map(p => {
+                const locked = p.value === 'email_sms' && !smsAllowed
+                return (
+                  <button
+                    key={p.value}
+                    type="button"
+                    disabled={locked}
+                    onClick={() => setNotifPref(p.value)}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm border transition-colors ${
+                      locked
+                        ? 'bg-surface-2/30 border-border opacity-60 cursor-not-allowed'
+                        : notifPref === p.value
+                        ? 'bg-primary/10 border-primary/30'
+                        : 'bg-surface-2/60 border-border hover:border-primary/30'
+                    }`}
+                  >
+                    <div className="text-left">
+                      <p className={`font-medium text-sm ${notifPref === p.value ? 'text-foreground' : 'text-muted-foreground'}`}>{p.label}</p>
+                      <p className="text-xs text-muted-foreground/60">{p.desc}</p>
                     </div>
-                  )}
-                </button>
-              ))}
+                    {locked ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-warning/15 text-warning shrink-0">
+                        <Lock className="w-2.5 h-2.5" /> Business+
+                      </span>
+                    ) : notifPref === p.value ? (
+                      <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shrink-0">
+                        <Check className="w-2.5 h-2.5 text-foreground" />
+                      </div>
+                    ) : null}
+                  </button>
+                )
+              })}
             </div>
             {notifPref === 'email_sms' && (
               <div className="mt-3">
@@ -818,6 +853,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
             {savingNotifs ? 'Saving…' : 'Save notifications'}
           </button>
         </div>
+        )}
       </Section>
 
           {/* ── Billing ── */}

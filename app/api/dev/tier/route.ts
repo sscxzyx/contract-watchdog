@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isDevAccount } from '@/lib/dev'
+import { seedDevPortfolio } from '@/lib/dev-seed'
+import type { PlanTier } from '@/types/database'
 
 const TIERS = ['free', 'starter', 'business', 'agency'] as const
 
@@ -30,6 +32,13 @@ export async function POST(request: Request) {
 
   if (error) {
     return NextResponse.json({ error: 'Failed to switch tier' }, { status: 500 })
+  }
+
+  // Re-seed the sample portfolio at a size that matches the tier (1 contract
+  // on free, up to a full agency book) so limits and dashboards read true.
+  const { error: seedError } = await seedDevPortfolio(admin, user.id, tier as PlanTier)
+  if (seedError) {
+    return NextResponse.json({ error: seedError }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true, tier })
