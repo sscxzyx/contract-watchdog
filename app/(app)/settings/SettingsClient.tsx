@@ -109,7 +109,7 @@ function DeleteModal({ onConfirm, onCancel, loading }: {
   const [confirm, setConfirm] = useState('')
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="rounded-2xl border border-border bg-[#0e0e10] p-6 max-w-sm w-full mx-4 shadow-card">
+      <div className="rounded-2xl border border-border bg-[#171A21] p-6 max-w-sm w-full mx-4 shadow-card">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 rounded-full bg-danger/10">
             <AlertTriangle className="w-5 h-5 text-danger" />
@@ -139,7 +139,7 @@ function DeleteModal({ onConfirm, onCancel, loading }: {
             disabled={loading || confirm !== 'delete'}
             className="flex-1 px-4 py-2.5 rounded-lg bg-danger hover:bg-danger/90 text-foreground text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Deleting…</> : 'Delete account'}
+            {loading ? <><span className="w-4 h-4 border-2 border-[#F2F0EB]/30 border-t-[#F2F0EB] rounded-full animate-spin" /> Deleting…</> : 'Delete account'}
           </button>
         </div>
       </div>
@@ -253,7 +253,7 @@ function BillingSection({ planTier, contractLimit, hasStripeCustomer }: {
                     <button
                       onClick={() => upgrade(plan.tier)}
                       disabled={loadingPlan !== null}
-                      className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft disabled:opacity-50 text-foreground text-xs font-medium transition-colors flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-lg bg-gold hover:bg-gold/90 shadow-glow-soft disabled:opacity-50 text-[#0F1115] text-xs font-medium transition-colors flex items-center gap-1.5"
                     >
                       {loadingPlan === plan.tier && <Loader2 className="w-3 h-3 animate-spin" />}
                       Upgrade
@@ -591,7 +591,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           <button
             onClick={saveProfile}
             disabled={savingProfile}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-foreground text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-[#0F1115] text-sm font-medium transition-colors disabled:opacity-50"
           >
             {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {savingProfile ? 'Saving…' : 'Save profile'}
@@ -687,7 +687,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           <button
             onClick={saveBusinessProfile}
             disabled={savingBusiness}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-foreground text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-[#0F1115] text-sm font-medium transition-colors disabled:opacity-50"
           >
             {savingBusiness ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {savingBusiness ? 'Saving…' : 'Save business profile'}
@@ -709,7 +709,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
             </p>
             <button
               onClick={() => scrollToSection('billing')}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground shadow-glow-soft hover:bg-primary/90 hover:shadow-glow transition-all shine"
+              className="inline-flex items-center gap-2 rounded-lg bg-gold px-4 py-2 text-xs font-medium text-[#0F1115] shadow-glow-soft hover:bg-gold/90 hover:shadow-glow transition-all shine"
             >
               <Zap className="w-3.5 h-3.5" /> View plans
             </button>
@@ -751,7 +751,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
                       </span>
                     ) : notifPref === p.value ? (
                       <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shrink-0">
-                        <Check className="w-2.5 h-2.5 text-foreground" />
+                        <Check className="w-2.5 h-2.5 text-[#0F1115]" />
                       </div>
                     ) : null}
                   </button>
@@ -784,7 +784,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
               onClick={() => setEmailAlertsEnabled(e => !e)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${emailAlertsEnabled ? 'bg-primary' : 'bg-border'}`}
             >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${emailAlertsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-[#F2F0EB] shadow transition-transform ${emailAlertsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
           </div>
 
@@ -847,7 +847,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
           <button
             onClick={saveNotifications}
             disabled={savingNotifs}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-foreground text-sm font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-[#0F1115] text-sm font-medium transition-colors disabled:opacity-50"
           >
             {savingNotifs ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {savingNotifs ? 'Saving…' : 'Save notifications'}
@@ -891,7 +891,7 @@ export default function SettingsClient({ userId, authEmail, profile, settings }:
               <button
                 type="submit"
                 disabled={savingPassword}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-foreground text-sm font-medium transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 shadow-glow-soft text-[#0F1115] text-sm font-medium transition-colors disabled:opacity-50"
               >
                 {savingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 {savingPassword ? 'Updating…' : 'Update password'}

@@ -33,12 +33,12 @@ export function DashboardMockup() {
         </span>
       </div>
 
-      <div className="relative rounded-2xl border border-border bg-[#0e0e10] shadow-card overflow-hidden">
+      <div className="relative rounded-2xl border border-border bg-[#171A21] shadow-card overflow-hidden">
         {/* window chrome */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-surface-2/40 relative z-20">
-          <span className="size-2.5 rounded-full bg-[#ff5f57]/80" />
-          <span className="size-2.5 rounded-full bg-[#febc2e]/80" />
-          <span className="size-2.5 rounded-full bg-[#28c840]/80" />
+          <span className="size-2.5 rounded-full bg-[#E5484D]/80" />
+          <span className="size-2.5 rounded-full bg-[#E8A73C]/80" />
+          <span className="size-2.5 rounded-full bg-[#4ADE80]/80" />
           <div className="ml-4 flex items-center gap-2 text-[11px] text-muted-foreground">
             <Shield size={12} className="text-primary" />
             controva.co/{tab}
@@ -53,7 +53,7 @@ export function DashboardMockup() {
         </div>
 
         {/* Mobile pill tabs — replace hidden sidebar */}
-        <div className="sm:hidden flex overflow-x-auto gap-1 p-2 border-b border-border bg-[#0c0c0e] no-scrollbar">
+        <div className="sm:hidden flex overflow-x-auto gap-1 p-2 border-b border-border bg-[#0F1115] no-scrollbar">
           {tabs.map((t) => (
             <button
               key={t.id}
@@ -74,7 +74,7 @@ export function DashboardMockup() {
 
         <div className="grid grid-cols-12 min-h-[420px] relative">
           {/* sidebar — desktop only */}
-          <aside className="col-span-2 border-r border-border p-3 hidden sm:flex flex-col gap-1 bg-[#0c0c0e]" role="tablist">
+          <aside className="col-span-2 border-r border-border p-3 hidden sm:flex flex-col gap-1 bg-[#0F1115]" role="tablist">
             <div className="flex items-center gap-2 px-2 py-2 mb-2">
               <div className="size-6 rounded-md bg-primary grid place-items-center text-[10px] font-bold text-primary-foreground shadow-glow-soft">C</div>
               <span className="text-xs font-semibold">Controva</span>
@@ -239,7 +239,7 @@ function Flag({ tone, text, sub, pulse }: {
       {pulse && (
         <span
           className="absolute -left-1 -top-1 size-2 rounded-full bg-danger"
-          style={{ boxShadow: '0 0 0 0 rgba(239,68,68,0.7)', animation: 'pulse-ring 2s infinite' }}
+          style={{ boxShadow: '0 0 0 0 rgba(229,72,77,0.7)', animation: 'pulse-ring 2s infinite' }}
         />
       )}
       <AlertTriangle size={12} className="mt-0.5 shrink-0" />
@@ -564,12 +564,12 @@ function RadialGauge({ value }: { value: number }) {
           strokeLinecap="round"
           strokeDasharray={c}
           strokeDashoffset={offset}
-          style={{ filter: 'drop-shadow(0 0 4px rgba(99,102,241,0.6))' }}
+          style={{ filter: 'drop-shadow(0 0 4px rgba(74,222,128,0.6))' }}
         />
         <defs>
           <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#22c55e" />
-            <stop offset="100%" stopColor="#6366f1" />
+            <stop offset="0%" stopColor="#4ADE80" />
+            <stop offset="100%" stopColor="#22C55E" />
           </linearGradient>
         </defs>
       </svg>

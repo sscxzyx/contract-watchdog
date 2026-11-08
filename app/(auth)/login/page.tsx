@@ -24,10 +24,22 @@ function LoginForm() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    let res: Response
+    try {
+      res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+    } catch {
+      setError('Something went wrong. Please try again.')
+      setLoading(false)
+      return
+    }
 
-    if (error) {
-      setError(error.message)
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setError(data.message || 'Incorrect email or password.')
       setLoading(false)
       return
     }
@@ -67,19 +79,19 @@ function LoginForm() {
           />
         </div>
 
-        <div className="bg-surface border border-[#27272a] rounded-xl p-6">
-          <h1 className="text-xl font-semibold text-white mb-1">Welcome back</h1>
-          <p className="text-[#a1a1aa] text-sm mb-6">Sign in to your account</p>
+        <div className="bg-surface border border-[#262A33] rounded-xl p-6">
+          <h1 className="text-xl font-semibold text-[#F2F0EB] mb-1">Welcome back</h1>
+          <p className="text-[#9BA1AC] text-sm mb-6">Sign in to your account</p>
 
           {error && (
-            <div className="mb-4 px-3.5 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="mb-4 px-3.5 py-2.5 rounded-lg bg-[#E5484D]/10 border border-[#E5484D]/20 text-[#E5484D] text-sm">
               {error}
             </div>
           )}
 
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-[#a1a1aa] mb-1.5">
+              <label className="block text-sm font-medium text-[#9BA1AC] mb-1.5">
                 Email
               </label>
               <input
@@ -88,13 +100,13 @@ function LoginForm() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@company.com"
                 required
-                className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+                className="w-full bg-[#1E222B] border border-[#262A33] rounded-lg px-3.5 py-2.5 text-sm text-[#F2F0EB] placeholder:text-[#9BA1AC] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-sm font-medium text-[#a1a1aa]">
+                <label className="block text-sm font-medium text-[#9BA1AC]">
                   Password
                 </label>
                 <Link href="/forgot-password" className="text-xs text-accent hover:text-accent-hover transition-colors">
@@ -107,14 +119,14 @@ function LoginForm() {
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+                className="w-full bg-[#1E222B] border border-[#262A33] rounded-lg px-3.5 py-2.5 text-sm text-[#F2F0EB] placeholder:text-[#9BA1AC] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-[#0F1115] font-medium py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? 'Signing in…' : 'Sign in'}
@@ -123,9 +135,9 @@ function LoginForm() {
 
           <div className="relative my-5">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#27272a]" />
+              <div className="w-full border-t border-[#262A33]" />
             </div>
-            <div className="relative flex justify-center text-xs text-[#52525b] bg-surface px-2">
+            <div className="relative flex justify-center text-xs text-[#9BA1AC] bg-surface px-2">
               or
             </div>
           </div>
@@ -134,7 +146,7 @@ function LoginForm() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={oauthLoading}
-            className="w-full bg-[#1a1a1a] hover:bg-[#27272a] disabled:opacity-50 disabled:cursor-not-allowed border border-[#27272a] text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-[#1E222B] hover:bg-[#262A33] disabled:opacity-50 disabled:cursor-not-allowed border border-[#262A33] text-[#F2F0EB] font-medium py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
           >
             {oauthLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -150,7 +162,7 @@ function LoginForm() {
           </button>
         </div>
 
-        <p className="text-center text-sm text-[#a1a1aa] mt-4">
+        <p className="text-center text-sm text-[#9BA1AC] mt-4">
           Don&apos;t have an account?{' '}
           <Link href="/signup" className="text-accent hover:text-accent-hover transition-colors">
             Sign up

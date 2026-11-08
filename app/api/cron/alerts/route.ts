@@ -160,44 +160,44 @@ function buildEmailHtml({ contractName, eventLabel, days, eventDate, contractId,
   const formatted = new Date(eventDate).toLocaleDateString('en-AU', {
     day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Australia/Brisbane',
   })
-  const dot = days <= 7 ? '#f87171' : days <= 14 ? '#fbbf24' : '#4ade80'
+  const dot = days <= 7 ? '#E5484D' : days <= 14 ? '#E8A73C' : '#4ADE80'
   const urgency = days <= 7 ? 'Urgent Alert' : days <= 14 ? 'Reminder' : 'Upcoming Deadline'
 
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+<body style="margin:0;padding:0;background:#0F1115;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
   <div style="max-width:560px;margin:40px auto;padding:0 20px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px">
-      <div style="width:32px;height:32px;background:#6366f1;border-radius:8px;display:flex;align-items:center;justify-content:center">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div style="width:32px;height:32px;background:#4ADE80;border-radius:8px;display:flex;align-items:center;justify-content:center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F1115" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
-      <span style="color:white;font-weight:600;font-size:16px">Controva</span>
+      <span style="color:#F2F0EB;font-weight:600;font-size:16px">Controva</span>
     </div>
 
-    <div style="background:#111111;border:1px solid #27272a;border-radius:12px;padding:28px">
+    <div style="background:#171A21;border:1px solid #262A33;border-radius:12px;padding:28px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
         <div style="width:8px;height:8px;background:${dot};border-radius:50%"></div>
-        <span style="color:#a1a1aa;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600">${urgency}</span>
+        <span style="color:#9BA1AC;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600">${urgency}</span>
       </div>
 
-      <h1 style="color:white;font-size:20px;font-weight:600;margin:0 0 8px 0;line-height:1.3">
+      <h1 style="color:#F2F0EB;font-size:20px;font-weight:600;margin:0 0 8px 0;line-height:1.3">
         ${safeLabel} in ${days} day${days !== 1 ? 's' : ''}
       </h1>
-      <p style="color:#a1a1aa;font-size:14px;margin:0 0 8px 0;line-height:1.6">
-        <strong style="color:white">${safeName}</strong>
+      <p style="color:#9BA1AC;font-size:14px;margin:0 0 8px 0;line-height:1.6">
+        <strong style="color:#F2F0EB">${safeName}</strong>
       </p>
-      <p style="color:#a1a1aa;font-size:14px;margin:0 0 24px 0">Due date: <strong style="color:white">${formatted}</strong></p>
+      <p style="color:#9BA1AC;font-size:14px;margin:0 0 24px 0">Due date: <strong style="color:#F2F0EB">${formatted}</strong></p>
 
       <a href="${siteUrl}/contracts/${contractId}"
-         style="display:inline-block;background:#6366f1;color:white;text-decoration:none;font-size:14px;font-weight:500;padding:10px 20px;border-radius:8px">
+         style="display:inline-block;background:#4ADE80;color:#0F1115;text-decoration:none;font-size:14px;font-weight:500;padding:10px 20px;border-radius:8px">
         View Contract →
       </a>
     </div>
 
-    <p style="color:#52525b;font-size:12px;text-align:center;margin-top:24px;line-height:1.6">
+    <p style="color:#9BA1AC;font-size:12px;text-align:center;margin-top:24px;line-height:1.6">
       You're receiving this because email alerts are enabled on your Controva account.<br>
-      <a href="${siteUrl}/settings" style="color:#6366f1;text-decoration:none">Manage notification preferences</a>
+      <a href="${siteUrl}/settings" style="color:#4ADE80;text-decoration:none">Manage notification preferences</a>
     </p>
   </div>
 </body>

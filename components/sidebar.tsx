@@ -103,12 +103,12 @@ export default function Sidebar() {
   return (
     <>
       {/* ── Desktop sidebar ── */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-64 bg-[#0c0c0e] border-r border-border flex-col z-50">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-64 bg-[#0F1115] border-r border-border flex-col z-50">
         {nav}
       </aside>
 
       {/* ── Mobile top bar ── */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-[#0c0c0e]/90 backdrop-blur border-b border-border flex items-center justify-between px-4 z-50">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-[#0F1115]/90 backdrop-blur border-b border-border flex items-center justify-between px-4 z-50">
         <Image
           src="/controva-logo.png"
           alt="Controva"
@@ -134,7 +134,7 @@ export default function Sidebar() {
       )}
 
       {/* ── Mobile drawer ── */}
-      <aside className={`lg:hidden fixed left-0 top-14 bottom-0 w-64 bg-[#0c0c0e] border-r border-border flex flex-col z-50 transition-transform duration-200 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`lg:hidden fixed left-0 top-14 bottom-0 w-64 bg-[#0F1115] border-r border-border flex flex-col z-50 transition-transform duration-200 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
         <nav className="flex-1 px-3 py-4 space-y-1">
           {navLinks}
         </nav>

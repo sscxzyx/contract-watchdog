@@ -155,11 +155,11 @@ export default async function DashboardPage() {
 
       {/* Free tier upgrade banner */}
       {profile?.plan_tier === 'free' && (
-        <div className="relative overflow-hidden flex items-center justify-between gap-4 px-4 py-3 bg-warning/[0.06] border border-warning/20 rounded-xl">
-          <span className="absolute -top-8 -right-8 size-24 rounded-full bg-warning/10 blur-2xl animate-breathe" />
+        <div className="relative overflow-hidden flex items-center justify-between gap-4 px-4 py-3 bg-gold/[0.06] border border-gold/20 rounded-xl">
+          <span className="absolute -top-8 -right-8 size-24 rounded-full bg-gold/10 blur-2xl animate-breathe" />
           <div className="relative flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-warning/15 border border-warning/20 flex items-center justify-center shrink-0">
-              <Zap className="w-4 h-4 text-warning" />
+            <div className="w-8 h-8 rounded-lg bg-gold/15 border border-gold/20 flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4 text-gold" />
             </div>
             <div>
               <p className="text-foreground text-sm font-medium">You&apos;re on the Free plan</p>
@@ -168,7 +168,7 @@ export default async function DashboardPage() {
           </div>
           <Link
             href="/settings#billing"
-            className="relative shrink-0 text-xs text-warning hover:text-warning/80 font-semibold transition-colors flex items-center gap-1 whitespace-nowrap"
+            className="relative shrink-0 text-xs text-gold hover:text-gold/80 font-semibold transition-colors flex items-center gap-1 whitespace-nowrap"
           >
             Upgrade now <ChevronRight className="w-3.5 h-3.5" />
           </Link>
@@ -227,12 +227,12 @@ export default async function DashboardPage() {
                     strokeLinecap="round"
                     strokeDasharray={gaugeC}
                     strokeDashoffset={gaugeC - (portfolioScore / 100) * gaugeC}
-                    style={{ filter: 'drop-shadow(0 0 4px rgba(99,102,241,0.6))' }}
+                    style={{ filter: 'drop-shadow(0 0 4px rgba(74,222,128,0.6))' }}
                   />
                   <defs>
                     <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#22c55e" />
-                      <stop offset="100%" stopColor="#6366f1" />
+                      <stop offset="0%" stopColor="#4ADE80" />
+                      <stop offset="100%" stopColor="#22C55E" />
                     </linearGradient>
                   </defs>
                 </svg>

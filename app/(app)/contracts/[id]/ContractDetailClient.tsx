@@ -116,7 +116,7 @@ function DeleteModal({ contractName, onConfirm, onCancel, loading, error }: {
           >
             {loading ? (
               <>
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-[#F2F0EB]/30 border-t-[#F2F0EB] rounded-full animate-spin" />
                 Deleting…
               </>
             ) : 'Delete'}

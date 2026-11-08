@@ -15,8 +15,8 @@ html {
 }
 
 body {
-  background-color: #0a0a0a;
-  color: #ffffff;
+  background-color: #0F1115;
+  color: #F2F0EB;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -28,16 +28,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #111111;
+  background: #171A21;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: #262A33;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: #3A3F4A;
 }
 
 /* ── Reveal ────────────────────────────────────────────────────────────── */
@@ -57,14 +57,14 @@ body {
 /* ── Gradients ─────────────────────────────────────────────────────────── */
 
 .text-gradient {
-  background: linear-gradient(to right, #ffffff, #a1a1aa);
+  background: linear-gradient(to right, #F2F0EB, #9BA1AC);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .text-gradient-indigo {
-  background: linear-gradient(90deg, #a5b4fc 0%, #6366f1 30%, #8b5cf6 60%, #6366f1 100%);
+  background: linear-gradient(90deg, #4ADE80 0%, #22C55E 30%, #4ADE80 60%, #22C55E 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -75,12 +75,12 @@ body {
 .text-shimmer {
   background: linear-gradient(
     90deg,
-    #a1a1aa 0%,
-    #ffffff 20%,
-    #a5b4fc 40%,
-    #ffffff 60%,
-    #a1a1aa 80%,
-    #a1a1aa 100%
+    #9BA1AC 0%,
+    #F2F0EB 20%,
+    #4ADE80 40%,
+    #F2F0EB 60%,
+    #9BA1AC 80%,
+    #9BA1AC 100%
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -110,8 +110,8 @@ body {
 
 .bg-grid-fine {
   background-image:
-    linear-gradient(rgba(99, 102, 241, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(74, 222, 128, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 222, 128, 0.06) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -121,7 +121,7 @@ body {
 }
 
 .bg-radial-glow {
-  background: radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.14) 0%, transparent 65%);
+  background: radial-gradient(ellipse at 50% 50%, rgba(74, 222, 128, 0.14) 0%, transparent 65%);
 }
 
 .mask-fade-b {
@@ -141,9 +141,9 @@ body {
   inset: -20% -20% auto -20%;
   height: 900px;
   background:
-    radial-gradient(60% 45% at 20% 40%, rgba(99, 102, 241, 0.35), transparent 60%),
-    radial-gradient(50% 40% at 80% 30%, rgba(139, 92, 246, 0.30), transparent 60%),
-    radial-gradient(50% 40% at 50% 70%, rgba(56, 189, 248, 0.20), transparent 60%);
+    radial-gradient(60% 45% at 20% 40%, rgba(74, 222, 128, 0.35), transparent 60%),
+    radial-gradient(50% 40% at 80% 30%, rgba(74, 222, 128, 0.30), transparent 60%),
+    radial-gradient(50% 40% at 50% 70%, rgba(74, 222, 128, 0.20), transparent 60%);
   filter: blur(80px);
   animation: aurora-drift 22s ease-in-out infinite alternate;
   pointer-events: none;
@@ -160,9 +160,9 @@ body {
   inset: 0;
   background: conic-gradient(from 210deg at 50% 50%,
     transparent 0deg,
-    rgba(99, 102, 241, 0.15) 45deg,
+    rgba(74, 222, 128, 0.15) 45deg,
     transparent 90deg,
-    rgba(139, 92, 246, 0.12) 180deg,
+    rgba(74, 222, 128, 0.12) 180deg,
     transparent 270deg
   );
   animation: conic-spin 24s linear infinite;
@@ -248,11 +248,11 @@ body {
   height: 2px;
   background: linear-gradient(90deg,
     transparent,
-    rgba(99, 102, 241, 0.9),
-    rgba(139, 92, 246, 0.9),
+    rgba(74, 222, 128, 0.9),
+    rgba(74, 222, 128, 0.9),
     transparent
   );
-  box-shadow: 0 0 24px rgba(99, 102, 241, 0.8);
+  box-shadow: 0 0 24px rgba(74, 222, 128, 0.8);
   animation: scan 3.5s ease-in-out infinite;
   pointer-events: none;
 }
@@ -299,7 +299,7 @@ body {
   border-radius: inherit;
   background: radial-gradient(
     500px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(99, 102, 241, 0.15),
+    rgba(74, 222, 128, 0.15),
     transparent 40%
   );
   opacity: 0;
@@ -322,9 +322,9 @@ body {
   border-radius: inherit;
   padding: 1px;
   background: linear-gradient(135deg,
-    rgba(99, 102, 241, 0.6),
-    rgba(139, 92, 246, 0.3),
-    rgba(56, 189, 248, 0.5)
+    rgba(74, 222, 128, 0.6),
+    rgba(74, 222, 128, 0.3),
+    rgba(74, 222, 128, 0.5)
   );
   background-size: 200% 200%;
   animation: gradient-shift 6s ease-in-out infinite;

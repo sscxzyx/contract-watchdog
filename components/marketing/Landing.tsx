@@ -29,7 +29,6 @@ export function Landing() {
         <WhoItsFor />
         <HowItWorks />
         <Pricing />
-        <Testimonials />
         <FAQ />
         <FinalCTA />
       </main>
@@ -63,7 +62,7 @@ function Hero() {
         className="hidden lg:flex right-[6%] top-[30%]"
         delay={1000}
         icon={<Shield size={12} className="text-primary" />}
-        label="Bank-level encryption"
+        label="256-bit encryption"
       />
       <FloatingBadge
         className="hidden lg:flex left-[8%] bottom-[18%]"
@@ -127,7 +126,7 @@ function Hero() {
 
         <Reveal delay={320}>
           <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5"><Lock size={12} className="text-primary" /> Bank-level encryption</span>
+            <span className="inline-flex items-center gap-1.5"><Lock size={12} className="text-primary" /> 256-bit encryption</span>
             <span className="inline-flex items-center gap-1.5"><MapPin size={12} className="text-primary" /> Built for Australian businesses</span>
             <span className="inline-flex items-center gap-1.5"><Zap size={12} className="text-primary" /> Analysis in under 60 seconds</span>
             <span className="inline-flex items-center gap-1.5"><Check size={12} className="text-primary" /> No lock-in contracts</span>
@@ -481,12 +480,12 @@ function Pricing() {
               <SpotlightCard
                 className={`relative h-full rounded-2xl border p-7 flex flex-col transition-all duration-300 hover:-translate-y-1 ${
                   p.popular
-                    ? 'border-primary/50 bg-gradient-to-b from-primary/[0.08] to-card shadow-glow glow-border'
+                    ? 'border-gold/50 bg-gradient-to-b from-gold/[0.08] to-card shadow-glow glow-border'
                     : 'border-border bg-card hover:border-primary/30'
                 }`}
               >
                 {p.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-wider bg-primary text-primary-foreground px-3 py-1 rounded-full shadow-glow-soft z-10">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-wider bg-gold text-[#0F1115] px-3 py-1 rounded-full shadow-glow-soft z-10">
                     Most Popular
                   </span>
                 )}
@@ -532,55 +531,10 @@ function Pricing() {
   )
 }
 
-/* ─────────── TESTIMONIALS ─────────── */
-function Testimonials() {
-  const reviews = [
-    { quote: "Finally I don't have to worry about my lease renewal sneaking up on me. Controva paid for itself in the first month.", name: 'Sarah M.', role: 'Café Owner, Brisbane' },
-    { quote: "As a subcontractor I'm signing new agreements constantly. Controva flags anything dodgy before I sign and tracks every deadline.", name: 'Mike T.', role: 'Electrical Contractor, Gold Coast' },
-    { quote: 'We manage 40+ client contracts. Controva gives us one clean view of everything. Game changer.', name: 'James R.', role: 'Marketing Agency, Melbourne' },
-  ]
-  return (
-    <section className="py-24 md:py-32 bg-surface relative overflow-hidden">
-      <div className="absolute -bottom-40 right-0 size-[500px] rounded-full bg-secondary/10 blur-[120px]" />
-      <div className="relative mx-auto max-w-6xl px-6">
-        <Reveal>
-          <SectionEyebrow>Testimonials</SectionEyebrow>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-center max-w-3xl mx-auto leading-tight">
-            What Australian <span className="text-gradient-indigo">business owners say</span>
-          </h2>
-        </Reveal>
-        <div className="mt-16 grid md:grid-cols-3 gap-5">
-          {reviews.map((r, i) => (
-            <Reveal key={r.name} delay={i * 80}>
-              <SpotlightCard className="h-full rounded-xl border border-border bg-card p-7 flex flex-col hover:border-primary/30 hover:-translate-y-1 transition-all duration-300">
-                <div className="text-primary text-4xl leading-none mb-3">&ldquo;</div>
-                <blockquote className="text-sm text-foreground/90 leading-relaxed flex-1">
-                  {r.quote}
-                </blockquote>
-                <figcaption className="mt-6 pt-5 border-t border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="size-9 rounded-full bg-gradient-to-br from-primary to-secondary grid place-items-center text-xs font-semibold text-primary-foreground shadow-glow-soft">
-                      {r.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{r.name}</p>
-                      <p className="text-xs text-muted-foreground">{r.role}</p>
-                    </div>
-                  </div>
-                </figcaption>
-              </SpotlightCard>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
 /* ─────────── FAQ ─────────── */
 function FAQ() {
   const faqs = [
-    { q: 'Is my contract data secure?', a: 'Yes. All contracts are encrypted at rest and in transit. We use bank-level security and your data is never shared or used to train AI models.' },
+    { q: 'Is my contract data secure?', a: 'Yes. All contracts are encrypted at rest (AES-256) and in transit (TLS), and your data is never sold, shared for marketing, or used to train AI models.' },
     { q: 'What types of contracts does Controva support?', a: 'Any contract in PDF or Word format — leases, supplier agreements, client contracts, employment agreements, subcontractor agreements and more.' },
     { q: 'Is Controva specific to Australia?', a: 'Yes. Controva is built specifically for Australian businesses and understands local contract law, regulations and requirements.' },
     { q: 'Can I cancel anytime?', a: 'Absolutely. No lock-in contracts. Cancel anytime from your account settings.' },
@@ -652,7 +606,7 @@ function FinalCTA() {
         </Reveal>
         <Reveal delay={120}>
           <p className="mt-6 text-base md:text-lg text-muted-foreground">
-            Join Australian small businesses protecting themselves with Controva AI.
+            Protect your business from costly contract surprises with Controva AI.
           </p>
         </Reveal>
         <Reveal delay={200}>
@@ -704,7 +658,7 @@ function Footer() {
             © 2026 Controva AI. Built in Brisbane, Australia <span aria-hidden>🇦🇺</span>
           </p>
           <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
-            <Shield size={11} className="text-primary" /> Bank-level encryption
+            <Shield size={11} className="text-primary" /> 256-bit encryption
           </p>
         </div>
       </div>

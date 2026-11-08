@@ -74,7 +74,7 @@ function UpgradeModal({ currentPlan, contractCount, onClose }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="border border-border bg-[#0e0e10] rounded-2xl p-6 max-w-md w-full mx-4 shadow-card">
+      <div className="border border-border bg-[#171A21] rounded-2xl p-6 max-w-md w-full mx-4 shadow-card">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 rounded-lg bg-warning/15 border border-warning/20">
             <Zap className="w-5 h-5 text-warning" />
@@ -122,7 +122,7 @@ function UpgradeModal({ currentPlan, contractCount, onClose }: {
                   <button
                     onClick={() => upgrade(plan.tier)}
                     disabled={loading !== null}
-                    className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-xs font-medium shadow-glow-soft transition-all flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-lg bg-gold hover:bg-gold/90 disabled:opacity-50 text-[#0F1115] text-xs font-medium shadow-glow-soft transition-all flex items-center gap-1.5"
                   >
                     {loading === plan.tier && <Loader2 className="w-3 h-3 animate-spin" />}
                     Upgrade

@@ -72,11 +72,11 @@ export default function SignupPage() {
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="w-full max-w-sm text-center">
           <div className="flex justify-center mb-4">
-            <CheckCircle className="w-12 h-12 text-green-400" />
+            <CheckCircle className="w-12 h-12 text-accent" />
           </div>
-          <h1 className="text-xl font-semibold text-white mb-2">Check your email</h1>
-          <p className="text-[#a1a1aa] text-sm">
-            We sent a confirmation link to <span className="text-white">{email}</span>. Click it to activate your account.
+          <h1 className="text-xl font-semibold text-[#F2F0EB] mb-2">Check your email</h1>
+          <p className="text-[#9BA1AC] text-sm">
+            We sent a confirmation link to <span className="text-[#F2F0EB]">{email}</span>. Click it to activate your account.
           </p>
           <Link
             href="/login"
@@ -103,19 +103,19 @@ export default function SignupPage() {
           />
         </div>
 
-        <div className="bg-surface border border-[#27272a] rounded-xl p-6">
-          <h1 className="text-xl font-semibold text-white mb-1">Create your account</h1>
-          <p className="text-[#a1a1aa] text-sm mb-6">Start protecting your contracts today</p>
+        <div className="bg-surface border border-[#262A33] rounded-xl p-6">
+          <h1 className="text-xl font-semibold text-[#F2F0EB] mb-1">Create your account</h1>
+          <p className="text-[#9BA1AC] text-sm mb-6">Start protecting your contracts today</p>
 
           {error && (
-            <div className="mb-4 px-3.5 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="mb-4 px-3.5 py-2.5 rounded-lg bg-[#E5484D]/10 border border-[#E5484D]/20 text-[#E5484D] text-sm">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSignup} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-[#a1a1aa] mb-1.5">
+              <label className="block text-sm font-medium text-[#9BA1AC] mb-1.5">
                 Full name
               </label>
               <input
@@ -124,12 +124,12 @@ export default function SignupPage() {
                 onChange={e => setFullName(e.target.value)}
                 placeholder="Jane Smith"
                 required
-                className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+                className="w-full bg-[#1E222B] border border-[#262A33] rounded-lg px-3.5 py-2.5 text-sm text-[#F2F0EB] placeholder:text-[#9BA1AC] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#a1a1aa] mb-1.5">
+              <label className="block text-sm font-medium text-[#9BA1AC] mb-1.5">
                 Email
               </label>
               <input
@@ -138,12 +138,12 @@ export default function SignupPage() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@company.com"
                 required
-                className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+                className="w-full bg-[#1E222B] border border-[#262A33] rounded-lg px-3.5 py-2.5 text-sm text-[#F2F0EB] placeholder:text-[#9BA1AC] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#a1a1aa] mb-1.5">
+              <label className="block text-sm font-medium text-[#9BA1AC] mb-1.5">
                 Password
               </label>
               <input
@@ -153,7 +153,7 @@ export default function SignupPage() {
                 placeholder="Min. 8 characters"
                 minLength={8}
                 required
-                className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+                className="w-full bg-[#1E222B] border border-[#262A33] rounded-lg px-3.5 py-2.5 text-sm text-[#F2F0EB] placeholder:text-[#9BA1AC] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
               />
             </div>
 
@@ -163,9 +163,9 @@ export default function SignupPage() {
                 checked={agreed}
                 onChange={e => setAgreed(e.target.checked)}
                 required
-                className="mt-0.5 w-4 h-4 rounded border-[#27272a] bg-[#1a1a1a] accent-[#6366f1] shrink-0"
+                className="mt-0.5 w-4 h-4 rounded border-[#262A33] bg-[#1E222B] accent-[#4ADE80] shrink-0"
               />
-              <span className="text-xs text-[#a1a1aa] leading-relaxed">
+              <span className="text-xs text-[#9BA1AC] leading-relaxed">
                 I agree to the{' '}
                 <Link href="/terms" target="_blank" className="text-accent hover:text-accent-hover transition-colors">
                   Terms and Conditions
@@ -180,7 +180,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-[#0F1115] font-medium py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? 'Creating account…' : 'Create account'}
@@ -189,9 +189,9 @@ export default function SignupPage() {
 
           <div className="relative my-5">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#27272a]" />
+              <div className="w-full border-t border-[#262A33]" />
             </div>
-            <div className="relative flex justify-center text-xs text-[#52525b] bg-surface px-2">
+            <div className="relative flex justify-center text-xs text-[#9BA1AC] bg-surface px-2">
               or
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function SignupPage() {
             type="button"
             onClick={handleGoogleSignup}
             disabled={oauthLoading}
-            className="w-full bg-[#1a1a1a] hover:bg-[#27272a] disabled:opacity-50 disabled:cursor-not-allowed border border-[#27272a] text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-[#1E222B] hover:bg-[#262A33] disabled:opacity-50 disabled:cursor-not-allowed border border-[#262A33] text-[#F2F0EB] font-medium py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
           >
             {oauthLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -216,7 +216,7 @@ export default function SignupPage() {
           </button>
         </div>
 
-        <p className="text-center text-sm text-[#a1a1aa] mt-4">
+        <p className="text-center text-sm text-[#9BA1AC] mt-4">
           Already have an account?{' '}
           <Link href="/login" className="text-accent hover:text-accent-hover transition-colors">
             Sign in

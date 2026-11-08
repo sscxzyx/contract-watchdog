@@ -73,21 +73,21 @@ function ProgressBar({ current }: { current: number }) {
         <div key={i} className="flex items-start">
           <div className="flex flex-col items-center">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
-              i < current ? 'bg-green-500 text-white'
-              : i === current ? 'bg-accent text-white ring-4 ring-accent/20'
-              : 'bg-[#1a1a1a] border border-[#27272a] text-[#52525b]'
+              i < current ? 'bg-accent text-[#0F1115]'
+              : i === current ? 'bg-accent text-[#0F1115] ring-4 ring-accent/20'
+              : 'bg-[#1E222B] border border-[#262A33] text-[#9BA1AC]'
             }`}>
               {i < current ? <Check className="w-3.5 h-3.5" /> : i + 1}
             </div>
             <span className={`text-[10px] mt-1.5 font-medium hidden sm:block text-center ${
-              i === current ? 'text-white' : 'text-[#52525b]'
+              i === current ? 'text-[#F2F0EB]' : 'text-[#9BA1AC]'
             }`}>
               {label}
             </span>
           </div>
           {i < STEP_LABELS.length - 1 && (
             <div className={`w-14 sm:w-20 h-px mt-4 transition-all duration-300 ${
-              i < current ? 'bg-green-500/50' : 'bg-[#27272a]'
+              i < current ? 'bg-accent/50' : 'bg-[#262A33]'
             }`} />
           )}
         </div>
@@ -112,43 +112,43 @@ function PlanCard({ plan, price, annual, isPopular, features, onSelect, saving }
       onClick={onSelect}
       className={`relative flex flex-col rounded-2xl p-6 border transition-all cursor-pointer ${
         isPopular
-          ? 'border-accent bg-accent/5 shadow-lg shadow-accent/10'
-          : 'border-[#27272a] bg-surface hover:border-[#3f3f46]'
+          ? 'border-gold bg-gold/5 shadow-lg shadow-gold/10'
+          : 'border-[#262A33] bg-surface hover:border-[#3A3F4A]'
       }`}
     >
       {isPopular && (
         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-          <span className="bg-accent text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 whitespace-nowrap">
-            <Star className="w-3 h-3 fill-white" /> Most Popular
+          <span className="bg-gold text-[#0F1115] text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 whitespace-nowrap">
+            <Star className="w-3 h-3 fill-[#0F1115]" /> Most Popular
           </span>
         </div>
       )}
 
-      <div className="mb-4 inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-full self-start">
-        <Zap className="w-3 h-3 text-green-400" />
-        <span className="text-xs text-green-400 font-medium whitespace-nowrap">First contract free</span>
+      <div className="mb-4 inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/10 border border-accent/20 rounded-full self-start">
+        <Zap className="w-3 h-3 text-accent" />
+        <span className="text-xs text-accent font-medium whitespace-nowrap">First contract free</span>
       </div>
 
-      <p className="text-xs font-semibold text-[#a1a1aa] uppercase tracking-widest mb-1">
+      <p className="text-xs font-semibold text-[#9BA1AC] uppercase tracking-widest mb-1">
         {plan.charAt(0).toUpperCase() + plan.slice(1)}
       </p>
 
       {annual ? (
         <>
           <div className="flex items-end gap-1.5 mb-1">
-            <span className="text-4xl font-bold text-white">A${price * 12}</span>
-            <span className="text-[#a1a1aa] text-sm mb-1.5">/yr</span>
+            <span className="text-4xl font-bold text-[#F2F0EB]">A${price * 12}</span>
+            <span className="text-[#9BA1AC] text-sm mb-1.5">/yr</span>
           </div>
-          <p className="text-xs text-[#a1a1aa] mb-1">A${price}/mo</p>
-          <p className="text-xs text-green-400 mb-4">Billed annually · 20% off</p>
+          <p className="text-xs text-[#9BA1AC] mb-1">A${price}/mo</p>
+          <p className="text-xs text-accent mb-4">Billed annually · 20% off</p>
         </>
       ) : (
         <>
           <div className="flex items-end gap-1.5 mb-1">
-            <span className="text-4xl font-bold text-white">A${price}</span>
-            <span className="text-[#a1a1aa] text-sm mb-1.5">/mo</span>
+            <span className="text-4xl font-bold text-[#F2F0EB]">A${price}</span>
+            <span className="text-[#9BA1AC] text-sm mb-1.5">/mo</span>
           </div>
-          <p className="text-xs text-[#52525b] mb-5">Billed monthly</p>
+          <p className="text-xs text-[#9BA1AC] mb-5">Billed monthly</p>
         </>
       )}
 
@@ -156,11 +156,11 @@ function PlanCard({ plan, price, annual, isPopular, features, onSelect, saving }
         {features.map(f => (
           <div key={f} className="flex items-start gap-2.5">
             <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-              isPopular ? 'bg-accent/20' : 'bg-[#1a1a1a]'
+              isPopular ? 'bg-accent/20' : 'bg-[#1E222B]'
             }`}>
-              <Check className={`w-2.5 h-2.5 ${isPopular ? 'text-accent' : 'text-[#a1a1aa]'}`} />
+              <Check className={`w-2.5 h-2.5 ${isPopular ? 'text-accent' : 'text-[#9BA1AC]'}`} />
             </div>
-            <span className="text-sm text-[#a1a1aa] leading-snug">{f}</span>
+            <span className="text-sm text-[#9BA1AC] leading-snug">{f}</span>
           </div>
         ))}
       </div>
@@ -170,8 +170,8 @@ function PlanCard({ plan, price, annual, isPopular, features, onSelect, saving }
         disabled={saving}
         className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-60 ${
           isPopular
-            ? 'bg-accent hover:bg-accent-hover text-white'
-            : 'bg-[#1a1a1a] hover:bg-[#27272a] border border-[#27272a] text-white'
+            ? 'bg-accent hover:bg-accent-hover text-[#0F1115]'
+            : 'bg-[#1E222B] hover:bg-[#262A33] border border-[#262A33] text-[#F2F0EB]'
         }`}
       >
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
@@ -183,7 +183,7 @@ function PlanCard({ plan, price, annual, isPopular, features, onSelect, saving }
 
 // ─── shared styles ────────────────────────────────────────────────────────────
 
-const inputCls = 'w-full bg-[#1a1a1a] border border-[#27272a] rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors'
+const inputCls = 'w-full bg-[#1E222B] border border-[#262A33] rounded-xl px-4 py-3 text-sm text-[#F2F0EB] placeholder:text-[#9BA1AC] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors'
 const selectCls = `${inputCls} appearance-none`
 
 // ─── main page ────────────────────────────────────────────────────────────────
@@ -372,7 +372,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-background flex flex-col">
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 h-14 border-b border-[#111111]">
+      <div className="flex items-center justify-between px-6 h-14 border-b border-[#262A33]">
         <Image
           src="/controva-logo.png"
           alt="Controva"
@@ -384,7 +384,7 @@ export default function OnboardingPage() {
         {step > 0 && (
           <button
             onClick={handleSkip}
-            className="text-sm text-[#52525b] hover:text-[#a1a1aa] transition-colors"
+            className="text-sm text-[#9BA1AC] hover:text-[#9BA1AC] transition-colors"
           >
             Skip for now
           </button>
@@ -403,22 +403,22 @@ export default function OnboardingPage() {
         {step === 0 && (
           <div className="w-full max-w-4xl">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-white mb-2">Choose your plan</h1>
-              <p className="text-[#a1a1aa]">Start with your first contract free — no card required</p>
+              <h1 className="text-3xl font-bold text-[#F2F0EB] mb-2">Choose your plan</h1>
+              <p className="text-[#9BA1AC]">Start with your first contract free — no card required</p>
             </div>
 
             {/* Billing toggle */}
             <div className="flex items-center justify-center gap-3 mb-8">
-              <span className={`text-sm font-medium ${billing === 'monthly' ? 'text-white' : 'text-[#52525b]'}`}>Monthly</span>
+              <span className={`text-sm font-medium ${billing === 'monthly' ? 'text-[#F2F0EB]' : 'text-[#9BA1AC]'}`}>Monthly</span>
               <button
                 onClick={() => setBilling(b => b === 'monthly' ? 'annual' : 'monthly')}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${billing === 'annual' ? 'bg-accent' : 'bg-[#27272a]'}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${billing === 'annual' ? 'bg-accent' : 'bg-[#262A33]'}`}
               >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${billing === 'annual' ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-[#F2F0EB] shadow transition-transform ${billing === 'annual' ? 'translate-x-6' : 'translate-x-1'}`} />
               </button>
-              <span className={`text-sm font-medium flex items-center gap-2 ${billing === 'annual' ? 'text-white' : 'text-[#52525b]'}`}>
+              <span className={`text-sm font-medium flex items-center gap-2 ${billing === 'annual' ? 'text-[#F2F0EB]' : 'text-[#9BA1AC]'}`}>
                 Annual
-                <span className="text-xs text-green-400 font-semibold bg-green-400/10 border border-green-400/20 px-2 py-0.5 rounded-full">
+                <span className="text-xs text-accent font-semibold bg-accent/10 border border-accent/20 px-2 py-0.5 rounded-full">
                   Save 20%
                 </span>
               </span>
@@ -452,7 +452,7 @@ export default function OnboardingPage() {
               />
             </div>
 
-            <p className="text-center text-xs text-[#52525b] mt-8">
+            <p className="text-center text-xs text-[#9BA1AC] mt-8">
               14-day free trial on Starter and Business. You&apos;ll enter payment details securely via Stripe after setup.
             </p>
           </div>
@@ -465,13 +465,13 @@ export default function OnboardingPage() {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 mb-4">
                 <Building2 className="w-6 h-6 text-accent" />
               </div>
-              <h1 className="text-2xl font-bold text-white mb-1">Tell us about your business</h1>
-              <p className="text-[#a1a1aa] text-sm">This helps us personalise your AI contract analysis</p>
+              <h1 className="text-2xl font-bold text-[#F2F0EB] mb-1">Tell us about your business</h1>
+              <p className="text-[#9BA1AC] text-sm">This helps us personalise your AI contract analysis</p>
             </div>
 
-            <div className="bg-surface border border-[#27272a] rounded-2xl p-6 space-y-5">
+            <div className="bg-surface border border-[#262A33] rounded-2xl p-6 space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-[#a1a1aa] mb-2 uppercase tracking-wide">Full name</label>
+                <label className="block text-xs font-semibold text-[#9BA1AC] mb-2 uppercase tracking-wide">Full name</label>
                 <input
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
@@ -481,7 +481,7 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#a1a1aa] mb-2 uppercase tracking-wide">Business name</label>
+                <label className="block text-xs font-semibold text-[#9BA1AC] mb-2 uppercase tracking-wide">Business name</label>
                 <input
                   value={businessName}
                   onChange={e => setBusinessName(e.target.value)}
@@ -492,7 +492,7 @@ export default function OnboardingPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#a1a1aa] mb-2 uppercase tracking-wide">Business type</label>
+                  <label className="block text-xs font-semibold text-[#9BA1AC] mb-2 uppercase tracking-wide">Business type</label>
                   <select
                     value={businessType}
                     onChange={e => setBusinessType(e.target.value as BusinessType)}
@@ -505,7 +505,7 @@ export default function OnboardingPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#a1a1aa] mb-2 uppercase tracking-wide">Industry</label>
+                  <label className="block text-xs font-semibold text-[#9BA1AC] mb-2 uppercase tracking-wide">Industry</label>
                   <select
                     value={industry}
                     onChange={e => setIndustry(e.target.value)}
@@ -520,7 +520,7 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#a1a1aa] mb-3 uppercase tracking-wide">
+                <label className="block text-xs font-semibold text-[#9BA1AC] mb-3 uppercase tracking-wide">
                   How many contracts do you manage?
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -532,7 +532,7 @@ export default function OnboardingPage() {
                       className={`py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                         contractVolume === v.value
                           ? 'bg-accent/10 text-accent border-accent/30'
-                          : 'bg-[#1a1a1a] text-[#a1a1aa] border-[#27272a] hover:border-[#3f3f46] hover:text-white'
+                          : 'bg-[#1E222B] text-[#9BA1AC] border-[#262A33] hover:border-[#3A3F4A] hover:text-[#F2F0EB]'
                       }`}
                     >
                       {v.label}
@@ -544,14 +544,14 @@ export default function OnboardingPage() {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={() => setStep(0)}
-                  className="flex items-center gap-1.5 text-sm text-[#52525b] hover:text-[#a1a1aa] transition-colors shrink-0"
+                  className="flex items-center gap-1.5 text-sm text-[#9BA1AC] hover:text-[#9BA1AC] transition-colors shrink-0"
                 >
                   <ArrowLeft className="w-4 h-4" /> Back
                 </button>
                 <button
                   onClick={saveStep1}
                   disabled={saving}
-                  className="flex-1 flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold py-3 rounded-xl text-sm transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-[#0F1115] font-semibold py-3 rounded-xl text-sm transition-colors disabled:opacity-50"
                 >
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                   {saving ? 'Saving…' : (<>Continue <ArrowRight className="w-4 h-4" /></>)}
@@ -568,14 +568,14 @@ export default function OnboardingPage() {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 mb-4">
                 <FileText className="w-6 h-6 text-accent" />
               </div>
-              <h1 className="text-2xl font-bold text-white mb-1">About your contracts</h1>
-              <p className="text-[#a1a1aa] text-sm">We&apos;ll use this to give you more relevant analysis</p>
+              <h1 className="text-2xl font-bold text-[#F2F0EB] mb-1">About your contracts</h1>
+              <p className="text-[#9BA1AC] text-sm">We&apos;ll use this to give you more relevant analysis</p>
             </div>
 
-            <div className="bg-surface border border-[#27272a] rounded-2xl p-6 space-y-6">
+            <div className="bg-surface border border-[#262A33] rounded-2xl p-6 space-y-6">
               {/* Contract types */}
               <div>
-                <label className="block text-xs font-semibold text-[#a1a1aa] mb-3 uppercase tracking-wide">
+                <label className="block text-xs font-semibold text-[#9BA1AC] mb-3 uppercase tracking-wide">
                   What types of contracts do you mainly deal with?
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -587,7 +587,7 @@ export default function OnboardingPage() {
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                         contractTypes.includes(t)
                           ? 'bg-accent/10 text-accent border-accent/30'
-                          : 'bg-[#1a1a1a] text-[#a1a1aa] border-[#27272a] hover:border-[#3f3f46] hover:text-white'
+                          : 'bg-[#1E222B] text-[#9BA1AC] border-[#262A33] hover:border-[#3A3F4A] hover:text-[#F2F0EB]'
                       }`}
                     >
                       {contractTypes.includes(t) && '✓ '}{t}
@@ -598,7 +598,7 @@ export default function OnboardingPage() {
 
               {/* Biggest headache */}
               <div>
-                <label className="block text-xs font-semibold text-[#a1a1aa] mb-3 uppercase tracking-wide">
+                <label className="block text-xs font-semibold text-[#9BA1AC] mb-3 uppercase tracking-wide">
                   What&apos;s your biggest contract headache?
                 </label>
                 <div className="space-y-2">
@@ -609,8 +609,8 @@ export default function OnboardingPage() {
                       onClick={() => setHeadache(h)}
                       className={`w-full text-left px-4 py-2.5 rounded-xl text-sm border transition-colors ${
                         headache === h
-                          ? 'bg-accent/10 text-white border-accent/30'
-                          : 'bg-[#1a1a1a] text-[#a1a1aa] border-[#27272a] hover:border-[#3f3f46] hover:text-white'
+                          ? 'bg-accent/10 text-[#F2F0EB] border-accent/30'
+                          : 'bg-[#1E222B] text-[#9BA1AC] border-[#262A33] hover:border-[#3A3F4A] hover:text-[#F2F0EB]'
                       }`}
                     >
                       {h}
@@ -621,7 +621,7 @@ export default function OnboardingPage() {
 
               {/* Caught out */}
               <div>
-                <label className="block text-xs font-semibold text-[#a1a1aa] mb-3 uppercase tracking-wide">
+                <label className="block text-xs font-semibold text-[#9BA1AC] mb-3 uppercase tracking-wide">
                   Have you ever been caught out by a contract clause?
                 </label>
                 <div className="space-y-2">
@@ -632,8 +632,8 @@ export default function OnboardingPage() {
                       onClick={() => setCaughtOut(o.value)}
                       className={`w-full text-left px-4 py-2.5 rounded-xl text-sm border transition-colors ${
                         caughtOut === o.value
-                          ? 'bg-accent/10 text-white border-accent/30'
-                          : 'bg-[#1a1a1a] text-[#a1a1aa] border-[#27272a] hover:border-[#3f3f46] hover:text-white'
+                          ? 'bg-accent/10 text-[#F2F0EB] border-accent/30'
+                          : 'bg-[#1E222B] text-[#9BA1AC] border-[#262A33] hover:border-[#3A3F4A] hover:text-[#F2F0EB]'
                       }`}
                     >
                       {o.label}
@@ -645,14 +645,14 @@ export default function OnboardingPage() {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={() => setStep(1)}
-                  className="flex items-center gap-1.5 text-sm text-[#52525b] hover:text-[#a1a1aa] transition-colors shrink-0"
+                  className="flex items-center gap-1.5 text-sm text-[#9BA1AC] hover:text-[#9BA1AC] transition-colors shrink-0"
                 >
                   <ArrowLeft className="w-4 h-4" /> Back
                 </button>
                 <button
                   onClick={saveStep2}
                   disabled={saving}
-                  className="flex-1 flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold py-3 rounded-xl text-sm transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-[#0F1115] font-semibold py-3 rounded-xl text-sm transition-colors disabled:opacity-50"
                 >
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                   {saving ? 'Saving…' : (<>Continue <ArrowRight className="w-4 h-4" /></>)}
@@ -669,14 +669,14 @@ export default function OnboardingPage() {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 mb-4">
                 <Bell className="w-6 h-6 text-accent" />
               </div>
-              <h1 className="text-2xl font-bold text-white mb-1">Stay on top of deadlines</h1>
-              <p className="text-[#a1a1aa] text-sm">Set up how you want to be alerted</p>
+              <h1 className="text-2xl font-bold text-[#F2F0EB] mb-1">Stay on top of deadlines</h1>
+              <p className="text-[#9BA1AC] text-sm">Set up how you want to be alerted</p>
             </div>
 
-            <div className="bg-surface border border-[#27272a] rounded-2xl p-6 space-y-6">
+            <div className="bg-surface border border-[#262A33] rounded-2xl p-6 space-y-6">
               {/* Notification method */}
               <div>
-                <label className="block text-xs font-semibold text-[#a1a1aa] mb-3 uppercase tracking-wide">
+                <label className="block text-xs font-semibold text-[#9BA1AC] mb-3 uppercase tracking-wide">
                   How do you want to be alerted?
                 </label>
                 <div className="space-y-2">
@@ -688,16 +688,16 @@ export default function OnboardingPage() {
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm border transition-colors ${
                         notifPref === p.value
                           ? 'bg-accent/10 border-accent/30'
-                          : 'bg-[#1a1a1a] border-[#27272a] hover:border-[#3f3f46]'
+                          : 'bg-[#1E222B] border-[#262A33] hover:border-[#3A3F4A]'
                       }`}
                     >
                       <div className="text-left">
-                        <p className={`font-medium ${notifPref === p.value ? 'text-white' : 'text-[#a1a1aa]'}`}>{p.label}</p>
-                        <p className="text-xs text-[#52525b] mt-0.5">{p.desc}</p>
+                        <p className={`font-medium ${notifPref === p.value ? 'text-[#F2F0EB]' : 'text-[#9BA1AC]'}`}>{p.label}</p>
+                        <p className="text-xs text-[#9BA1AC] mt-0.5">{p.desc}</p>
                       </div>
                       {notifPref === p.value && (
                         <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center shrink-0">
-                          <Check className="w-3 h-3 text-white" />
+                          <Check className="w-3 h-3 text-[#0F1115]" />
                         </div>
                       )}
                     </button>
@@ -708,8 +708,8 @@ export default function OnboardingPage() {
               {/* Phone number — only if SMS selected */}
               {notifPref === 'email_sms' && (
                 <div>
-                  <label className="block text-xs font-semibold text-[#a1a1aa] mb-2 uppercase tracking-wide">
-                    Phone number <span className="text-[#52525b] normal-case font-normal">(optional)</span>
+                  <label className="block text-xs font-semibold text-[#9BA1AC] mb-2 uppercase tracking-wide">
+                    Phone number <span className="text-[#9BA1AC] normal-case font-normal">(optional)</span>
                   </label>
                   <input
                     type="tel"
@@ -723,7 +723,7 @@ export default function OnboardingPage() {
 
               {/* Alert days */}
               <div>
-                <label className="block text-xs font-semibold text-[#a1a1aa] mb-3 uppercase tracking-wide">
+                <label className="block text-xs font-semibold text-[#9BA1AC] mb-3 uppercase tracking-wide">
                   How far in advance do you want warnings?
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -735,7 +735,7 @@ export default function OnboardingPage() {
                       className={`px-3.5 py-2 rounded-xl text-sm font-medium border transition-colors ${
                         alertDays.includes(d)
                           ? 'bg-accent/10 text-accent border-accent/30'
-                          : 'bg-[#1a1a1a] text-[#a1a1aa] border-[#27272a] hover:border-[#3f3f46] hover:text-white'
+                          : 'bg-[#1E222B] text-[#9BA1AC] border-[#262A33] hover:border-[#3A3F4A] hover:text-[#F2F0EB]'
                       }`}
                     >
                       {d === 1 ? '1 day' : `${d} days`}
@@ -747,14 +747,14 @@ export default function OnboardingPage() {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={() => setStep(2)}
-                  className="flex items-center gap-1.5 text-sm text-[#52525b] hover:text-[#a1a1aa] transition-colors shrink-0"
+                  className="flex items-center gap-1.5 text-sm text-[#9BA1AC] hover:text-[#9BA1AC] transition-colors shrink-0"
                 >
                   <ArrowLeft className="w-4 h-4" /> Back
                 </button>
                 <button
                   onClick={saveStep3}
                   disabled={saving || alertDays.length === 0}
-                  className="flex-1 flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold py-3 rounded-xl text-sm transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-[#0F1115] font-semibold py-3 rounded-xl text-sm transition-colors disabled:opacity-50"
                 >
                   {saving ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Setting up…</>

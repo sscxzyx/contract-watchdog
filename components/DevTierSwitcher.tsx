@@ -39,7 +39,7 @@ export default function DevTierSwitcher({ currentTier }: { currentTier: string }
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 rounded-xl border border-primary/30 bg-[#0e0e10]/95 backdrop-blur shadow-card overflow-hidden w-48">
+    <div className="fixed bottom-4 right-4 z-50 rounded-xl border border-primary/30 bg-[#171A21]/95 backdrop-blur shadow-card overflow-hidden w-48">
       <button
         onClick={() => setCollapsed(c => !c)}
         className="w-full flex items-center gap-2 px-3 py-2 text-left"

@@ -366,7 +366,7 @@ function VaultContent() {
         <button
           onClick={handleUpgrade}
           disabled={upgrading}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-glow hover:bg-primary/90 hover:scale-[1.02] disabled:opacity-50 transition-all shine"
+          className="inline-flex items-center gap-2 rounded-lg bg-gold px-6 py-3 text-sm font-medium text-[#0F1115] shadow-glow hover:bg-gold/90 hover:scale-[1.02] disabled:opacity-50 transition-all shine"
         >
           {upgrading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
           {upgrading ? 'Redirecting…' : 'Upgrade to Starter — A$29/mo'}

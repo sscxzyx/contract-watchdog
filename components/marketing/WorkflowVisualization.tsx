@@ -33,16 +33,16 @@ export function WorkflowVisualization() {
         >
           <defs>
             <linearGradient id="flowGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#6366f1" stopOpacity="0" />
-              <stop offset="20%" stopColor="#6366f1" stopOpacity="0.6" />
-              <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.8" />
-              <stop offset="80%" stopColor="#6366f1" stopOpacity="0.6" />
-              <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+              <stop offset="0%" stopColor="#4ADE80" stopOpacity="0" />
+              <stop offset="20%" stopColor="#4ADE80" stopOpacity="0.6" />
+              <stop offset="50%" stopColor="#22C55E" stopOpacity="0.8" />
+              <stop offset="80%" stopColor="#4ADE80" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="#4ADE80" stopOpacity="0" />
             </linearGradient>
             <linearGradient id="flowGradBright" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#a5b4fc" stopOpacity="0" />
-              <stop offset="50%" stopColor="#c4b5fd" stopOpacity="1" />
-              <stop offset="100%" stopColor="#a5b4fc" stopOpacity="0" />
+              <stop offset="0%" stopColor="#4ADE80" stopOpacity="0" />
+              <stop offset="50%" stopColor="#4ADE80" stopOpacity="1" />
+              <stop offset="100%" stopColor="#4ADE80" stopOpacity="0" />
             </linearGradient>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3" result="blur" />
@@ -57,7 +57,7 @@ export function WorkflowVisualization() {
           <path
             d="M 170 130 Q 340 60, 500 130 T 830 130"
             fill="none"
-            stroke="rgba(99, 102, 241, 0.15)"
+            stroke="rgba(74, 222, 128, 0.15)"
             strokeWidth="1.5"
           />
           {/* Animated dashed flow */}

@@ -46,34 +46,34 @@ export default function ForgotPasswordPage() {
           />
         </div>
 
-        <div className="bg-surface border border-[#27272a] rounded-xl p-6">
+        <div className="bg-surface border border-[#262A33] rounded-xl p-6">
           {sent ? (
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-500/10 border border-green-500/20 mb-4">
-                <CheckCircle className="w-6 h-6 text-green-400" />
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 border border-accent/20 mb-4">
+                <CheckCircle className="w-6 h-6 text-accent" />
               </div>
-              <h1 className="text-lg font-semibold text-white mb-1.5">Check your email</h1>
-              <p className="text-sm text-[#a1a1aa]">
-                We&apos;ve sent a password reset link to <span className="text-white">{email}</span>.
+              <h1 className="text-lg font-semibold text-[#F2F0EB] mb-1.5">Check your email</h1>
+              <p className="text-sm text-[#9BA1AC]">
+                We&apos;ve sent a password reset link to <span className="text-[#F2F0EB]">{email}</span>.
                 It may take a minute to arrive.
               </p>
             </div>
           ) : (
             <>
-              <h1 className="text-lg font-semibold text-white mb-1">Reset your password</h1>
-              <p className="text-sm text-[#a1a1aa] mb-5">
+              <h1 className="text-lg font-semibold text-[#F2F0EB] mb-1">Reset your password</h1>
+              <p className="text-sm text-[#9BA1AC] mb-5">
                 Enter the email you signed up with. We&apos;ll send you a link to set a new password.
               </p>
 
               {error && (
-                <div className="mb-4 px-3.5 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                <div className="mb-4 px-3.5 py-2.5 rounded-lg bg-[#E5484D]/10 border border-[#E5484D]/20 text-[#E5484D] text-sm">
                   {error}
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[#a1a1aa] mb-1.5">
+                  <label className="block text-sm font-medium text-[#9BA1AC] mb-1.5">
                     Email
                   </label>
                   <input
@@ -82,14 +82,14 @@ export default function ForgotPasswordPage() {
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@company.com"
                     required
-                    className="w-full bg-[#1a1a1a] border border-[#27272a] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
+                    className="w-full bg-[#1E222B] border border-[#262A33] rounded-lg px-3.5 py-2.5 text-sm text-[#F2F0EB] placeholder:text-[#9BA1AC] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-[#0F1115] font-medium py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                   {loading ? 'Sending…' : 'Send reset link'}
@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
           )}
         </div>
 
-        <p className="text-center text-sm text-[#a1a1aa] mt-4">
+        <p className="text-center text-sm text-[#9BA1AC] mt-4">
           <Link href="/login" className="inline-flex items-center gap-1.5 text-accent hover:text-accent-hover transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
           </Link>
